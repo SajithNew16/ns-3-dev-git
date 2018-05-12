@@ -1,0 +1,72 @@
+## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+def build(bld):
+    module = bld.create_ns3_module('trust', ['internet', 'wifi'])
+    module.includes = '.'
+    module.source = [
+        'model/trust-id-cache.cc',
+        'model/trust-dpd.cc',
+        'model/trust-rtable.cc',
+        'model/trust-rqueue.cc',
+        'model/trust-packet.cc',
+        'model/trust-neighbor.cc',
+        'model/trust-routing-protocol.cc',
+        'helper/trust-helper.cc',
+        'model/TrustTableEntry.cc',
+        'model/TrustTable.cc',
+        'model/BackupTableEntry.cc',
+        'model/BackupTable.cc',
+        'model/NodeEntry.cc',
+        'model/TestValueGenerator.cc',
+        'model/DirTrustCal.cc',
+        'model/IndTrustCal.cc',
+        'model/RecommendationTable.cc',
+        'model/RecommendationTableEntry.cc',
+        'model/TrustLevelClassifier.cc',
+        'model/Spiral.cc',
+        'model/TrustInfoReceiver.cc',
+        'model/TRRTableEntry.cc',
+        'model/TRRTable.cc'
+        ]
+
+    trust_test = bld.create_ns3_module_test_library('trust')
+    trust_test.source = [
+        'test/trust-id-cache-test-suite.cc',
+        'test/trust-test-suite.cc',
+        'test/trust-regression.cc',
+        'test/bug-772.cc',
+        'test/loopback.cc',
+        ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'trust'
+    headers.source = [
+        'model/trust-id-cache.h',
+        'model/trust-dpd.h',
+        'model/trust-rtable.h',
+        'model/trust-rqueue.h',
+        'model/trust-packet.h',
+        'model/trust-neighbor.h',
+        'model/trust-routing-protocol.h',
+        'helper/trust-helper.h',
+        'model/TrustTableEntry.h',    
+        'model/TrustTable.h',
+        'model/BackupTableEntry.h',
+        'model/BackupTable.h',
+        'model/NodeEntry.h',
+        'model/TestValueGenerator.h',
+        'model/DirTrustCal.h',
+        'model/IndTrustCal.h',
+        'model/RecommendationTable.h',
+        'model/RecommendationTableEntry.h',
+        'model/TrustLevelClassifier.h',
+        'model/Spiral.h',
+        'model/TrustInfoReceiver.h',
+        'model/TRRTableEntry.h',
+        'model/TRRTable.h'
+        ]
+
+    if bld.env['ENABLE_EXAMPLES']:
+        bld.recurse('examples')
+
+    bld.ns3_python_bindings()
