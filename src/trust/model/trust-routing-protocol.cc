@@ -418,11 +418,35 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
           sockerr = Socket::ERROR_NOROUTETOHOST;
           return Ptr<Ipv4Route> ();
         }
+
       UpdateRouteLifeTime (dst, m_activeRouteTimeout);
       UpdateRouteLifeTime (route->GetGateway (), m_activeRouteTimeout);
 
-      DirTrustCal dirCalculator;
-      dirCalculator.calculateDirectTrust(&m_trustTable);
+            for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries().begin(); it != m_trustTable.getTrustTableEntries().end(); it++)
+             {
+           	  if(it->getDestinationNode() == dst)
+           	  {
+           	  it->incNDF();
+           	  }
+             }
+
+      //direct trust calculation
+         	DirTrustCal dirCalculator;
+          dirCalculator.calculateDirectTrust(&m_trustTable);
+
+      /*
+       //indirect trust calculation
+      	IndTrustCal indTrustCal;
+      	indTrustCal.setTrustTable(&m_trustTable);
+      	std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
+
+      	for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+      	{
+      		double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
+      		it->updateIndirectTrust(ind_trust_value);
+      		it->calculateGlobalTrust();
+      		//TODO: inside above calculateGlobalTrust() need to update backupTable.
+      	}*/
 
 
       return route;
@@ -1790,6 +1814,7 @@ RoutingProtocol::ProcessHello (RrepHeader const & rrepHeader, Ipv4Address receiv
     {
       m_nb.Update (rrepHeader.GetDst (), Time (m_allowedHelloLoss * m_helloInterval));
     }
+  m_trustTable.incrementAllHelloPacketsCount();
 }
 
 void
@@ -1968,6 +1993,13 @@ RoutingProtocol::SendHello ()
         {
           destination = iface.GetBroadcast ();
         }
+
+      TrustTableEntry* trustTableEntry = m_trustTable.getTrustTableEntryByNodeId(destination);
+      if(trustTableEntry != 0)
+      {
+    	  trustTableEntry->incHELLO();
+      }
+
       Time jitter = Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10)));
       Simulator::Schedule (jitter, &RoutingProtocol::SendTo, this, socket, packet, destination);
     }
@@ -2250,8 +2282,8 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 
             Ptr<Packet> packet = Create<Packet> ();
 			      packet->AddHeader (trrHeader);
-			      TypeHeader tHeader (TRUSTTYPE_TRR);
-			      packet->AddHeader (tHeader);
+			      /*TypeHeader tHeader (TRUSTTYPE_TRR);
+			      packet->AddHeader (tHeader);*/
 
 			// Send to all-hosts broadcast if on /32 addr, subnet-directed otherwise
 			Ipv4Address destination;
@@ -2264,8 +2296,8 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
               {
                 destination = iface.GetBroadcast ();
               }*/
-			std::cout<<"sending TRR"<<std::endl;
-			tHeader.Print(std::cout);
+//			std::cout<<"sending TRR"<<std::endl;
+			trrHeader.Print(std::cout);
             Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packet, destination);
           }
 
