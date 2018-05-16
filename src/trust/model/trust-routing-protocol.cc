@@ -2285,6 +2285,11 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 			      /*TypeHeader tHeader (TRUSTTYPE_TRR);
 			      packet->AddHeader (tHeader);*/
 
+			      //newly added
+			      TypeHeader tHeader (TRUSTTYPE_TRR);
+			      packet->AddHeader (tHeader);
+			      socket->SendTo (packet, 0, InetSocketAddress (receiver, TRUST_PORT));
+
 			// Send to all-hosts broadcast if on /32 addr, subnet-directed otherwise
 			Ipv4Address destination;
 			destination = Ipv4Address ("255.255.255.255");
