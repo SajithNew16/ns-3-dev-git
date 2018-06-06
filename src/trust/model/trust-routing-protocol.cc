@@ -1211,6 +1211,8 @@ RoutingProtocol::RecvTrust (Ptr<Socket> socket)
       return; // drop
     }
 
+  std::cout<<"jude added tHeader.Get () : "<<tHeader.Get ()<<std::endl;
+
   switch (tHeader.Get ())
     {
     case TRUSTTYPE_RREQ:
@@ -1235,6 +1237,7 @@ RoutingProtocol::RecvTrust (Ptr<Socket> socket)
       }
     case TRUSTTYPE_TRR:
 	{
+		std::cout<<"TRUSTTYPE_TRR received!!!!"<<std::endl;
 		RecvTrr(sender, packet);
 		break;
 	}
@@ -2286,7 +2289,6 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 			      //newly added
 			      TypeHeader tHeader (TRUSTTYPE_TRR);
 			      packet->AddHeader (tHeader);
-			      std::cout << "Send: " << *packet << std::endl;
 			      socket->SendTo (packet, 0, InetSocketAddress (iface.GetBroadcast(), TRUST_PORT));
 
 			// Send to all-hosts broadcast if on /32 addr, subnet-directed otherwise
@@ -2301,7 +2303,7 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
                 destination = iface.GetBroadcast ();
               }*/
 //			std::cout<<"sending TRR"<<std::endl;
-//			trrHeader.Print(std::cout);
+			trrHeader.Print(std::cout);
             Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packet, destination);
           }
 
@@ -2336,11 +2338,15 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 void
 RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 {
+	std::cout<<"jude added"<<std::endl;
   RoutingTableEntry rt;
   TRRHeader trrHeader(TRUSTTYPE_TRR);
-  std::cout << "Recv in RecvTrr - " << *packet << std::endl;
+  std::cout<<packet<<std::endl;
   packet->RemoveHeader(trrHeader);
-  // trrHeader.Print(std::cout);
+//  std::cout<<"receive end ----- trrHeader.GetDst="<<trrHeader.GetDst()<<std::endl;
+  std::cout << "trrHeader.GetDst () === "<< trrHeader.GetDst () << std::endl;
+  std::cout << "trrHeader.GetOrigin () === "<< trrHeader.GetOrigin() << std::endl;
+  std::cout << "trrHeader.GetDT () === "<< trrHeader.GetDT() << std::endl;
 
   if (IsMyOwnAddress (trrHeader.GetOrigin()))
   {
@@ -2348,6 +2354,11 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 //	  rec = sendTRR(node, targetNode);
 	  Time time = trrHeader.GetTrrLifetime();
 	  Time currentTime = Simulator::Now();
+
+	  /*std::cout << "time.GetMilliSeconds() =  "<<time<< std::endl;
+	  std::cout << "currentTime.GetMilliSeconds() =  "<<currentTime.GetMilliSeconds()<< std::endl;
+	  std::cout << "(currentTime - time) =  "<<(currentTime - time)<< std::endl;
+	  std::cout << "Seconds(1500).GetMilliSeconds() =  "<<Seconds(15).GetMilliSeconds()<< std::endl;*/
 
 	  if((currentTime - time) < Time(1500).GetMilliSeconds()){
 		  TRRTableEntry entry;
@@ -2368,6 +2379,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 
   for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries().begin(); it != m_trustTable.getTrustTableEntries().end(); it++)
    {
+	  std::cout << "it Des "<<it->getDestinationNode()<<" trr des "<< trrHeader.GetDst()<<std::endl;
  	  if(it->getDestinationNode() == trrHeader.GetDst())
  	  {
  		double val = it->getDirectTrust();
@@ -2381,7 +2393,6 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
  		Ipv4Address dt;
  		dt.Set(flt);
  		trrHeader.setDT(flt);
- 		trrHeader.SetDstSeqno(flt); // yes, this is for testing purposes; setting the direct trust value as seq no
  		double val_GT = it->getGlobalTrust();
  		std::ostringstream strs2;
  		strs2 << val_GT;
@@ -2399,10 +2410,8 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
    }
 
    Ptr<Packet> packetReply = Create<Packet> ();
-//   trrHeader.SetDstSeqno(152);
+   trrHeader.SetDstSeqno(152);
    packetReply->AddHeader (trrHeader);
-   TypeHeader tHeader (TRUSTTYPE_TRR);
-   packetReply->AddHeader (tHeader);
 /*
    TypeHeader tHeader (AODVTYPE_TRR);
    packetReply->AddHeader (tHeader);
@@ -2412,10 +2421,9 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
    {
 	   RoutingTableEntry searchingRoutingEntry;
 	   if(m_routingTable.LookupValidRoute(trrHeader.GetOrigin(), searchingRoutingEntry)){
+		   std::cout << " \n trrHeader.GetDT() ========= "<< trrHeader.GetDT()<<std::endl;
 		   Ptr<Socket> socket = FindSocketWithInterfaceAddress(searchingRoutingEntry.GetInterface ());
-		   // std::cout<<"Sending the response(below is the packet)"<<std::endl;
-		   std::cout << "Send in RecvTrr - " << *packetReply << std::endl;
-		   // trrHeader.Print(std::cout); //Printing the TRR header packet into Terminal
+		   trrHeader.Print(std::cout); //Printing the TRR header packet into Terminal
 	   	   Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packetReply, sender);
 	   }
    }

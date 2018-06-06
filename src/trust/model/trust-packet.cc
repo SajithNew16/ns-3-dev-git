@@ -727,12 +727,15 @@ void
 TRRHeader::Serialize (Buffer::Iterator i) const
 {
   i.WriteU32(m_GT);
+  std::cout<<"Serialize    m_GT="<<m_GT<<std::endl;
   WriteTo (i, m_dst);
   i.WriteU32(m_DT);
-  i.WriteU32 (m_trrID);
-  i.WriteU32 (m_dstSeqNo);
+  std::cout<<"Serialize    m_DT="<<m_DT<<std::endl;
+  i.WriteHtonU32 (m_trrID);
+  i.WriteHtonU32 (m_dstSeqNo);
   WriteTo (i, m_origin);
-  i.WriteU32 (m_originSeqNo);
+  i.WriteHtonU32 (m_originSeqNo);
+//  Print(std::cout);
 }
 
 uint32_t
@@ -741,24 +744,26 @@ TRRHeader::Deserialize (Buffer::Iterator start)
   Buffer::Iterator i = start;
   m_GT = i.ReadU32();
   ReadFrom (i, m_dst);
+  std::cout<<"Deserialize   m_dst="<<m_dst<<std::endl;
   m_DT = i.ReadU32();
-  m_trrID = i.ReadU32 ();
-  m_dstSeqNo = i.ReadU32 ();
+  std::cout<<"Deserialize   m_DT="<<m_DT<<std::endl;
+  m_trrID = i.ReadNtohU32 ();
+  m_dstSeqNo = i.ReadNtohU32 ();
   ReadFrom (i, m_origin);
-  m_originSeqNo = i.ReadU32 ();
+  m_originSeqNo = i.ReadNtohU32 ();
 
   uint32_t dist = i.GetDistanceFrom (start);
-  // Print(std::cout); //Printing out the entire TRR header
-  NS_ASSERT (dist == GetSerializedSize ());
+  Print(std::cout); //Printing out the entire TRR header
+//  NS_ASSERT (dist == GetSerializedSize ());
   return dist;
 }
 
 void
 TRRHeader::Print (std::ostream &os) const
 {
-  os << "m_GT " << m_GT << " m_DT " << m_DT << " Dst " << m_dst
-     << " DstSqnNo " << m_dstSeqNo << " Src "
-     << m_origin << " SrcSqnNo " << m_originSeqNo ;
+  os << "m_GT " << m_GT << " m_DT " << m_DT << " destination: ipv4 " << m_dst
+     << " sequence number " << m_dstSeqNo << " source: ipv4 "
+     << m_origin << " sequence number " << m_originSeqNo ;
 }
 
 std::ostream &
