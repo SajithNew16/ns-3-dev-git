@@ -20,7 +20,7 @@ private:
 	Ipv4Address neighborNodeId;
 	Ipv4Address recommendingNodesList;
 	double maturityLevel;
-	bool blackList;
+	// bool blackList;
 	double recommendationValue;
 
 public:
