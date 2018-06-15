@@ -398,6 +398,10 @@ private:
   void RecvTrr (Ipv4Address sender, Ptr<Packet> packet);
 
   void execute();
+  /// Calculate Direct Trust at the beginning.
+  void ExecuteFirst();
+  /// Print trust tables after all the transmissions happened.
+  void ExecuteLast();
 
   /// Hello timer
   Timer m_htimer;
