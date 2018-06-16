@@ -26,6 +26,12 @@ void RecommendationTableEntry::setNeighborNodeId(Ipv4Address neighborNodeId)
 	this->neighborNodeId = neighborNodeId;
 }
 
+void
+RecommendationTableEntry::SetRecommendingNodes (Ipv4Address neighborNodeId)
+{
+	this->recommendingNodesList = neighborNodeId;
+}
+
 void RecommendationTableEntry::setMaturityLevel(double maturityLevel)
 {
 	this->maturityLevel = maturityLevel;

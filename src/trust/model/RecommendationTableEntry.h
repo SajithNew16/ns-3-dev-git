@@ -27,6 +27,7 @@ public:
 	Ipv4Address getneighborNodeId();
 	void setNeighborNodeId(Ipv4Address neighborNodeId);
 	Ipv4Address getRecommendingNodes();
+	void SetRecommendingNodes (Ipv4Address neighborNodeId);
 	double getrecValue();
 	void setRecValue(double recommendationValue);
 	int getMaturityLevel();
