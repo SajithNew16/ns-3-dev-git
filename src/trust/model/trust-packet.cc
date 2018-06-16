@@ -693,9 +693,9 @@ operator<< (std::ostream & os, RerrHeader const & h )
 // TRR
 //-----------------------------------------------------------------------------
 TRRHeader::TRRHeader ( uint32_t GT, uint32_t DT, uint32_t trrID, Ipv4Address dst,
-                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t originSeqNo) :
+                        uint32_t dstSeqNo, Ipv4Address origin, Ipv4Address target, uint32_t originSeqNo, uint32_t trrLifetime) :
   m_GT (GT), m_DT (DT), m_trrID (trrID), m_dst (dst),
-  m_dstSeqNo (dstSeqNo), m_origin (origin),  m_originSeqNo (originSeqNo)
+  m_dstSeqNo (dstSeqNo), m_origin (origin), m_target (target), m_originSeqNo (originSeqNo), m_trrLifetime (trrLifetime)
 {
 }
 
@@ -720,34 +720,36 @@ TRRHeader::GetInstanceTypeId () const
 uint32_t
 TRRHeader::GetSerializedSize () const
 {
-  return 32;
+  return 36;
 }
 
 void
 TRRHeader::Serialize (Buffer::Iterator i) const
 {
-  i.WriteU32(m_GT);
+  i.WriteU32 (m_GT);
   WriteTo (i, m_dst);
-  i.WriteU32(m_DT);
+  i.WriteU32 (m_DT);
   i.WriteU32 (m_trrID);
   i.WriteU32 (m_dstSeqNo);
   WriteTo (i, m_origin);
+  WriteTo (i, m_target);
   i.WriteU32 (m_originSeqNo);
-  i.WriteHtonU32(m_trrLifetime);
+  i.WriteHtonU32 (m_trrLifetime);
 }
 
 uint32_t
 TRRHeader::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
-  m_GT = i.ReadU32();
+  m_GT = i.ReadU32 ();
   std::cout<<"JUDE ADDED::: Deserialized m_GT = " <<m_GT<<std::endl;
   ReadFrom (i, m_dst);
-  m_DT = i.ReadU32();
+  m_DT = i.ReadU32 ();
   std::cout<<"JUDE ADDED::: Deserialized m_DT = " <<m_DT<<std::endl;
   m_trrID = i.ReadU32 ();
   m_dstSeqNo = i.ReadU32 ();
   ReadFrom (i, m_origin);
+  ReadFrom (i, m_target);
   m_originSeqNo = i.ReadU32 ();
   m_trrLifetime = i.ReadNtohU32 ();
   std::cout<<"JUDE ADDED::: Deserialized trrLifetime = " <<m_trrLifetime<<std::endl;
@@ -762,7 +764,7 @@ TRRHeader::Print (std::ostream &os) const
 {
   os << "m_GT " << m_GT << " m_DT " << m_DT << " destination: ipv4 " << m_dst
      << " sequence number " << m_dstSeqNo << " source: ipv4 "
-     << m_origin << " sequence number " << m_originSeqNo << "\n" ;
+     << m_origin << " target: ipv4 " << m_target << " sequence number " << m_originSeqNo << " TRR Lifetime " << m_trrLifetime << "\n" ;
 }
 
 std::ostream &
@@ -777,7 +779,7 @@ TRRHeader::operator== (TRRHeader const & o) const
 {
   return ( m_GT == o.m_GT && m_DT == o.m_DT &&
           m_dst == o.m_dst && m_dstSeqNo == o.m_dstSeqNo &&
-          m_origin == o.m_origin && m_originSeqNo == o.m_originSeqNo);
+          m_origin == o.m_origin && m_target == o.m_target && m_originSeqNo == o.m_originSeqNo && m_trrLifetime == o.m_trrLifetime);
 }
 }
 }

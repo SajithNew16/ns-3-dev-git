@@ -634,8 +634,8 @@ public:
   /// c-tor
 	TRRHeader (uint32_t GT = 0, uint32_t DT = 0,
               uint32_t trrID = 0, Ipv4Address dst = Ipv4Address (),
-              uint32_t dstSeqNo = 0, Ipv4Address origin = Ipv4Address (),
-              uint32_t originSeqNo = 0);
+              uint32_t dstSeqNo = 0, Ipv4Address origin = Ipv4Address (), Ipv4Address target = Ipv4Address (),
+              uint32_t originSeqNo = 0, uint32_t trrLifetime = 0);
 
   //\{
   static TypeId GetTypeId ();

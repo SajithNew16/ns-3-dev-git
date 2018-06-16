@@ -2344,36 +2344,43 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
   packet->RemoveHeader(trrHeader);
 
   if (IsMyOwnAddress (trrHeader.GetOrigin()))
-  {
+    {
 	  std::cout << "TRR BACK TO HOME!!! "<< std::endl;
   //  rec = sendTRR(node, targetNode);
 	  Time time (MilliSeconds (trrHeader.GetTrrLifetime()));
 	  Time currentTime = Simulator::Now();
 
-	  if((currentTime - time).GetSeconds() < Time(15e10).GetSeconds()){
+	  if ((currentTime - time).GetSeconds() < Time(15e10).GetSeconds())
+	    {
 		  double orginalDT = (trrHeader.GetDT()) / 100000.0;
 		  double originalGT =(trrHeader.GetGT()) / 100000.0;
-		  TRRTableEntry entry;
-		  entry.setSentTime(time);
-		  entry.setReceivedTime(currentTime);
-		  entry.setDirectTrust(orginalDT);
-		  entry.setGlobalTrust(originalGT);
-		  entry.setTargetNodeId(trrHeader.GetTarget());
-		  std::cout << "adding the TRR table entry "<< std::endl;
-		  m_TRRTable.addTrrTableEntry(entry);
-		  m_TRRTable.printTable();
-
-
+		  TRRTableEntry trrTableentry;
 		  RecommendationTableEntry recTableEntry;
-		  recTableEntry.setNeighborNodeId(sender);
-		  recTableEntry.setRecValue(orginalDT);
-		  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
-		  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
-		  m_recommendationTable.printTable();
-	  }
 
-    return;
-  }
+		  if (trrHeader.GetDst() != trrHeader.GetTarget())
+		    {
+              std::cout << "adding the TRR table entry "<< std::endl;
+              trrTableentry.SetDestinationNodeId (trrHeader.GetDst());
+              trrTableentry.setSenderNodeId(trrHeader.GetOrigin());
+              trrTableentry.setSentTime(time);
+              trrTableentry.setReceivedTime(currentTime);
+              trrTableentry.setDirectTrust(orginalDT);
+              trrTableentry.setGlobalTrust(originalGT);
+              trrTableentry.setTargetNodeId(trrHeader.GetTarget());
+			  m_TRRTable.addTrrTableEntry(trrTableentry);
+			  m_TRRTable.printTable();
+			  recTableEntry.SetRecommendingNodes(trrHeader.GetTarget());
+			  recTableEntry.setNeighborNodeId(trrHeader.GetDst());
+			  recTableEntry.setRecValue(orginalDT);
+			  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
+			  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
+			  m_recommendationTable.printTable();
+		    }
+	    }
+
+      return;
+
+    }
 
   bool status = false;
 
