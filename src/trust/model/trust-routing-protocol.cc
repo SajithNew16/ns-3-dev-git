@@ -1306,7 +1306,7 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
 	 m_trustTable.addTrustTableEntry(trustTableEntry);
   }
 
-  //populate recommendation table
+ /* //populate recommendation table
   RecommendationTableEntry recommendationTableEntry;
   recommendationTableEntry.setNeighborNodeId(sender);
   int recCount = 0;
@@ -1323,7 +1323,7 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
   if(recCount == 0)
   {
 	 m_recommendationTable.addRecommendationTableEntry(recommendationTableEntry);
-  }
+  }*/
 
 }
 
