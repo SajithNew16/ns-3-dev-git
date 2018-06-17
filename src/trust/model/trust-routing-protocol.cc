@@ -436,19 +436,18 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       DirTrustCal dirCalculator;
       dirCalculator.calculateDirectTrust(&m_trustTable);
 
-      /*
-       //indirect trust calculation
-      	IndTrustCal indTrustCal;
-      	indTrustCal.setTrustTable(&m_trustTable);
-      	std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
+      //indirect trust calculation
+      IndTrustCal indTrustCal;
+      indTrustCal.setTrustTable(&m_trustTable);
+      std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
 
-      	for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+      for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
       	{
       		double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
       		it->updateIndirectTrust(ind_trust_value);
       		it->calculateGlobalTrust();
       		//TODO: inside above calculateGlobalTrust() need to update backupTable.
-      	}*/
+      	}
 
 
       return route;
@@ -2352,7 +2351,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 
 	  if ((currentTime - time).GetSeconds() < Time(15e10).GetSeconds())
 	    {
-		  double orginalDT = (trrHeader.GetDT()) / 100000.0;
+		  double originalDT = (trrHeader.GetDT()) / 100000.0;
 		  double originalGT =(trrHeader.GetGT()) / 100000.0;
 		  TRRTableEntry trrTableentry;
 		  RecommendationTableEntry recTableEntry;
@@ -2364,14 +2363,14 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
               trrTableentry.setSenderNodeId(trrHeader.GetOrigin());
               trrTableentry.setSentTime(time);
               trrTableentry.setReceivedTime(currentTime);
-              trrTableentry.setDirectTrust(orginalDT);
+              trrTableentry.setDirectTrust(originalDT);
               trrTableentry.setGlobalTrust(originalGT);
               trrTableentry.setTargetNodeId(trrHeader.GetTarget());
 			  m_TRRTable.addTrrTableEntry(trrTableentry);
 			  m_TRRTable.printTable();
 			  recTableEntry.SetRecommendingNodes(trrHeader.GetTarget());
 			  recTableEntry.setNeighborNodeId(trrHeader.GetDst());
-			  recTableEntry.setRecValue(orginalDT);
+			  recTableEntry.setRecValue(originalGT);
 			  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
 			  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
 			  m_recommendationTable.printTable();
@@ -2468,6 +2467,20 @@ RoutingProtocol::ExecuteFirst()
   DirTrustCal dirCalculator;
   //Calculate Direct Trust at the beginning.
   dirCalculator.calculateDirectTrust(&m_trustTable);
+
+  //Calculate indirect trust at the beginning.
+  IndTrustCal indTrustCal;
+  indTrustCal.setTrustTable(&m_trustTable);
+  std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
+
+  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+    {
+      double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
+      it->updateIndirectTrust(ind_trust_value);
+      it->calculateGlobalTrust();
+      //TODO: inside above calculateGlobalTrust() need to update backupTable.
+    }
+
 }
 
 void
