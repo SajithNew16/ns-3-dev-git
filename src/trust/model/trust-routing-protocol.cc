@@ -449,6 +449,9 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       		//TODO: inside above calculateGlobalTrust() need to update backupTable.
       	}
 
+      //Trust levels classification
+      TrustLevelClassifier trustLevelClassifier;
+      trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
       return route;
     }
@@ -1235,10 +1238,10 @@ RoutingProtocol::RecvTrust (Ptr<Socket> socket)
         break;
       }
     case TRUSTTYPE_TRR:
-	{
-		RecvTrr(sender, packet);
+	  {
+		RecvTrr (sender, packet);
 		break;
-	}
+	  }
     }
 }
 
@@ -2355,6 +2358,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  double originalGT =(trrHeader.GetGT()) / 100000.0;
 		  TRRTableEntry trrTableentry;
 		  RecommendationTableEntry recTableEntry;
+		  IndTrustCal indTrustCal;
 
 		  if (trrHeader.GetDst() != trrHeader.GetTarget())
 		    {
@@ -2374,8 +2378,24 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 			  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
 			  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
 			  m_recommendationTable.printTable();
-		    }
-	    }
+			  //change the flag in IndTrustCal class in order to notify TRR reply packet get received
+			  indTrustCal.SetFlag (2);
+			  //recalculate trust values after getting recommendations from neighbor nodes
+			  indTrustCal.setTrustTable (&m_trustTable);
+			  indTrustCal.SetTrrTable (&m_TRRTable);
+			  std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
+			  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+			    {
+			  	  double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
+			  	  it->updateIndirectTrust(ind_trust_value);
+			  	  it->calculateGlobalTrust();
+			  	  //TODO: inside above calculateGlobalTrust() need to update backupTable.
+			  	}
+		     }
+		     //Trust levels classification
+		     TrustLevelClassifier trustLevelClassifier;
+		     trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+	     }
 
       return;
 
@@ -2462,29 +2482,33 @@ void RoutingProtocol::execute() {
 }
 
 void
-RoutingProtocol::ExecuteFirst()
+RoutingProtocol::ExecuteFirst ()
 {
   DirTrustCal dirCalculator;
   //Calculate Direct Trust at the beginning.
-  dirCalculator.calculateDirectTrust(&m_trustTable);
+  dirCalculator.calculateDirectTrust (&m_trustTable);
 
   //Calculate indirect trust at the beginning.
   IndTrustCal indTrustCal;
-  indTrustCal.setTrustTable(&m_trustTable);
+  indTrustCal.setTrustTable (&m_trustTable);
   std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
 
   for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
     {
-      double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
-      it->updateIndirectTrust(ind_trust_value);
-      it->calculateGlobalTrust();
+      double ind_trust_value = indTrustCal.calculateIndirectTrust (*it);
+      it->updateIndirectTrust (ind_trust_value);
+      it->calculateGlobalTrust ();
       //TODO: inside above calculateGlobalTrust() need to update backupTable.
     }
+
+  //Trust levels classification
+  TrustLevelClassifier trustLevelClassifier;
+  trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
 }
 
 void
-RoutingProtocol::ExecuteLast()
+RoutingProtocol::ExecuteLast ()
 {
   //print trust table after all the packet transmissions happened
   std::cout << "\n  ================== Printing trust tables at the end ==================" << std::endl;

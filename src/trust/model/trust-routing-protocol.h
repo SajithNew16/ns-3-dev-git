@@ -62,7 +62,6 @@ public:
    */
   static TypeId GetTypeId (void);
   static const uint32_t TRUST_PORT;
-
   /// constructor
   RoutingProtocol ();
   virtual ~RoutingProtocol ();

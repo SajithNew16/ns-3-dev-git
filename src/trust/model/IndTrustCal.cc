@@ -73,11 +73,23 @@ IndTrustCal::IndTrustCal() {
  * Returns:   rec
  * Parameter: node, targetNode
  */
-double* IndTrustCal::sendTRR(TrustTableEntry node, TrustTableEntry targetNode) {
-	//TODO : Need to send a packet to targetNode to get the DT and GT
+double*
+IndTrustCal::sendTRR (TrustTableEntry node, TrustTableEntry targetNode) {
 	static double rec[2];
 	rec[0] = 0.5;
 	rec[1] = 0.6;
+
+    if (this->flag1 == 2)
+	  {
+		  for (std::vector<TRRTableEntry>::iterator it = this->trrTable->getTrrTableEntries().begin(); it != this->trrTable->getTrrTableEntries().end(); it++)
+		    {
+			  if(it->GetDestinationNodeId() == node.getDestinationNode() && it->getTargetNodeId() == targetNode.getDestinationNode())
+			    {
+				  rec[0] = it->getDirectTrust();
+				  rec[1] = it->getGlobalTrust();
+			    }
+		    }
+	  }
 	return rec;
 }
 
@@ -160,7 +172,8 @@ double IndTrustCal::calculateMaturityLevel(TrustTableEntry node) {
  * Returns:   w_sum
  * Parameter: targetNode
  */
-double IndTrustCal::calculateIndirectTrust(TrustTableEntry targetNode) {
+double
+IndTrustCal::calculateIndirectTrust (TrustTableEntry targetNode) {
 	std::vector<TrustTableEntry> node_entry_list =
 			this->trustTable->getTrustTableEntries();
 	double w_sum = 0;
@@ -175,7 +188,18 @@ double IndTrustCal::calculateIndirectTrust(TrustTableEntry targetNode) {
 			w_sum = w_sum + cal_w_term;
 		}
 	}
-	return w_sum;
+	double value = round ( w_sum * 100000.0 ) / 100000.0;
+	return value;
+}
+
+void
+IndTrustCal::SetFlag (uint flag1) {
+	this->flag1 = flag1;
+}
+
+void
+IndTrustCal::SetTrrTable (TRRTable* trrTable) {
+	this->trrTable = trrTable;
 }
 
 IndTrustCal::~IndTrustCal() {

@@ -28,10 +28,6 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 
 	for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++) {
 		node_GT = it->getGlobalTrust();
-
-		std::cout << "Trust level: " << it->getTrustLevel() << std::endl;
-		std::cout << "Indirect Trust: " << it->getIndirectTrust() << std::endl;
-
 		if (node_GT > Threshold_trust)
 		{
 			if (node_GT > Threshold_trustWorthy)
@@ -53,18 +49,15 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 			}
 			else
 			{
+				it->setTrustLevel(4);
 				//call spiral model method
-				Spiral model;
+			/*	Spiral model;
 				double *past_global_trust_range;
-				past_global_trust_range = model.getMinMaxTrust(trustTable);
-				std::cout << "Max GT:- " << past_global_trust_range[1] << std::endl;
+				past_global_trust_range = model.getMinMaxTrust(trustTable);*/
+//				std::cout << "Max GT:- " << past_global_trust_range[1] << std::endl;
 //				model.addMaliciousCategory(past_global_trust_range, trustTable);
 			}
 		}
-
-		std::cout << "Trust level: " << it->getTrustLevel() << std::endl;
-		std::cout << "Indirect Trust: " << it->getIndirectTrust() << std::endl;
-
 	}
 }
 
