@@ -26,19 +26,26 @@ std::vector<BackupTableEntry>& BackupTable::getBackupTableEntries()
 void
 BackupTable::printTable()
 {
-	std::cout << ">>>>>>>>>>>>>> Backup Table <<<<<<<<<<<<<<<" << std::endl;
-	std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator << "Analyzed Result" << std::endl;
-//	int index = backupTableRecords.size()-1;
-	for (std::vector<BackupTableEntry>::iterator it = backupTableRecords.begin(); it != backupTableRecords.end(); it++)
-	{
-		/*if (index)
+	uint n = 5;
+	if (backupTableRecords.size() >= n)
+	  {
+	    std::vector<BackupTableEntry> y(backupTableRecords.end() - n, backupTableRecords.end());
+	    std::cout << ">>>>>>>>>>>>>> Last 5 records of Backup Table <<<<<<<<<<<<<<<" << std::endl;
+	    std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator << "Analyzed Result" << std::endl;
+	    for (std::vector<BackupTableEntry>::iterator it = y.begin(); it != y.end(); it++)
+	      {
+            std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
+          }
+	  }
+	else
+	  {
+		std::cout << ">>>>>>>>>>>>>> Backup Table <<<<<<<<<<<<<<<" << std::endl;
+		std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator << "Analyzed Result" << std::endl;
+		for (std::vector<BackupTableEntry>::iterator it = backupTableRecords.begin(); it != backupTableRecords.end(); it++)
 		  {
-			std::cout << "| " << backupTableRecords.at(index).getNeiNode() << columnSeperator << backupTableRecords.at(index).getTrustValue() << "\t" << columnSeperator << backupTableRecords.at(index).GetTimeDuration() << "\t\t" << columnSeperator << backupTableRecords.at(index).GetResult() << std::endl;
-
-			index--;
-		  }*/
-		std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
-	}
+		    std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
+		  }
+	  }
 }
 
 void BackupTable::addToTrustList(double trustValue)
