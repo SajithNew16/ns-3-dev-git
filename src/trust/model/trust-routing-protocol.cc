@@ -448,7 +448,19 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       		it->calculateGlobalTrust();
       		//TODO: inside above calculateGlobalTrust() need to update backupTable.
       	}
-
+      //add entries to m_backupTable
+      std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
+      std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size()*2);
+      int index = trust_entry_vector.size();
+      for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
+      	{
+      		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
+      		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
+      		backup_entry_vector.at(index).setTimeDuration(2.3);
+      		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+      		index++;
+      	}
+//      m_backupTable.printTable();
       //Trust levels classification
       TrustLevelClassifier trustLevelClassifier;
       trustLevelClassifier.identifyTrustLevel (&m_trustTable);
@@ -2392,9 +2404,21 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 			  	  //TODO: inside above calculateGlobalTrust() need to update backupTable.
 			  	}
 		     }
-		     //Trust levels classification
-		     TrustLevelClassifier trustLevelClassifier;
-		     trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+		    //add entries to m_backupTable
+		    std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
+		  	std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size()*3);
+		  	int index = trust_entry_vector.size()*2;
+		  	for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
+		  	{
+		  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
+		  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
+		  		backup_entry_vector.at(index).setTimeDuration(2.3);
+		  		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+		  		index++;
+		  	}
+		    //Trust levels classification
+		    TrustLevelClassifier trustLevelClassifier;
+		    trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 	     }
 
       return;
@@ -2479,6 +2503,7 @@ void RoutingProtocol::execute() {
 	std::cout << "\n  ================== Printing trust table ==================" << std::endl;
 //	m_recommendationTable.printTable();
 	m_trustTable.printTable();
+//	m_backupTable.printTable();
 }
 
 void
@@ -2500,7 +2525,20 @@ RoutingProtocol::ExecuteFirst ()
       it->calculateGlobalTrust ();
       //TODO: inside above calculateGlobalTrust() need to update backupTable.
     }
-
+  //add entries to m_backupTable
+  std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
+  std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size());
+  int index = 0;
+  for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
+  	{
+  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
+  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
+  		backup_entry_vector.at(index).setTimeDuration(2.3);
+  		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+  		index++;
+  	}
+//  m_trustTable.printTable();
+  m_backupTable.printTable();
   //Trust levels classification
   TrustLevelClassifier trustLevelClassifier;
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
@@ -2513,6 +2551,7 @@ RoutingProtocol::ExecuteLast ()
   //print trust table after all the packet transmissions happened
   std::cout << "\n  ================== Printing trust tables at the end ==================" << std::endl;
   m_trustTable.printTable();
+//  m_backupTable.printTable();
 }
 
 void
