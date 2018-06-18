@@ -16,7 +16,6 @@ public:
 	static TrustTable* getDummyTrustTable();
 	static TrustTable* getDummyDirTrustTable();
 	static RecommendationTable* getDummyRecommendationTableByTrustTable(TrustTable* trustTable);
-	static BackupTable* getDummyBackupTableByTrustTable(TrustTable* trustTable);
 	~TestValueGenerator();
 };
 

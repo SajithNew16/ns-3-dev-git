@@ -53,13 +53,14 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 				Spiral spiralModel;
 				double *past_global_trust_range;
 				past_global_trust_range = spiralModel.GetMinMaxTrust (this->backupTable);
-				if (node_GT < past_global_trust_range[0] || node_GT > past_global_trust_range[1])
+				if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
 				  {
-					it->setTrustLevel(5);
+					it->setTrustLevel(4);
+//					trustTable->removeTrustTableEntry(*it);
 				  }
 				else
 				  {
-					it->setTrustLevel(4);
+					it->setTrustLevel(5);
 				  }
 //				model.addMaliciousCategory(past_global_trust_range, trustTable);
 			  }

@@ -456,7 +456,7 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       	{
       		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
       		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-      		backup_entry_vector.at(index).setTimeDuration(2.3);
+      		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(1));
       		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
       		index++;
       	}
@@ -2368,7 +2368,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 	  if ((currentTime - time).GetSeconds() < Time(15e10).GetSeconds())
 	    {
 		  double originalDT = (trrHeader.GetDT()) / 100000.0;
-		  double originalGT =(trrHeader.GetGT()) / 100000.0;
+		  double originalGT = (trrHeader.GetGT()) / 100000.0;
 		  TRRTableEntry trrTableentry;
 		  RecommendationTableEntry recTableEntry;
 		  IndTrustCal indTrustCal;
@@ -2413,7 +2413,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  	{
 		  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
 		  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-		  		backup_entry_vector.at(index).setTimeDuration(2.3);
+		  		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(3));
 		  		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
 		  		index++;
 		  	}
@@ -2535,7 +2535,7 @@ RoutingProtocol::ExecuteFirst ()
   	{
   		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
   		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-  		backup_entry_vector.at(index).setTimeDuration(2.3);
+  		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now());
   		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
   		index++;
   	}
@@ -2555,7 +2555,7 @@ RoutingProtocol::ExecuteLast ()
   //print trust table after all the packet transmissions happened
   std::cout << "\n  ================== Printing trust tables at the end ==================" << std::endl;
   m_trustTable.printTable();
-//  m_backupTable.printTable();
+  m_backupTable.printTable();
 }
 
 void

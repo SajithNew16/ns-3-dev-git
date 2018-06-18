@@ -49,17 +49,19 @@ std::string BackupTableEntry::getResult()
 	return this->result;
 }
 
-void BackupTableEntry::setTimeDuration(double timeDuration)
+void
+BackupTableEntry::SetTimeDuration (Time timeDuration)
 {
 	this->timeDuration = timeDuration;
 }
 
-double BackupTableEntry::getTimeDuration()
+Time
+BackupTableEntry::GetTimeDuration ()
 {
 	return this->timeDuration;
 }
 
-void BackupTableEntry::updateTimeDuration(double timeDuration)
+void BackupTableEntry::updateTimeDuration(Time timeDuration)
 {
 	this->timeDuration = timeDuration;
 }

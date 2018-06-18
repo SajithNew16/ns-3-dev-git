@@ -1,5 +1,6 @@
 #pragma once
 #include "ns3/ipv4-address.h"
+#include "ns3/nstime.h"
 #include <string>
 
 namespace ns3
@@ -12,7 +13,7 @@ class BackupTableEntry
 private:
 	Ipv4Address neiNode;
 	double trustValue;
-	double timeDuration;
+	Time timeDuration;
 	std::string result;
 public:
 	BackupTableEntry();
@@ -24,9 +25,9 @@ public:
 	void setResult(std::string result);
 	void updateResult(std::string result);
 	std::string getResult();
-	void setTimeDuration(double timeDuration);
-	double getTimeDuration();
-	void updateTimeDuration(double timeDuration);
+	void SetTimeDuration (Time timeDuration);
+	Time GetTimeDuration ();
+	void updateTimeDuration(Time timeDuration);
 	~BackupTableEntry();
 };
 

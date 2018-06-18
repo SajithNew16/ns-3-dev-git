@@ -20,7 +20,8 @@ void TrustTable::addTrustTableEntry(TrustTableEntry entry)
 
 void TrustTable::removeTrustTableEntry(TrustTableEntry entry)
 {
-	trustTableRecords.pop_back(); //need to change this
+//	entry.
+//	trustTableRecords.pop_back(); //need to change this
 }
 
 TrustTableEntry* TrustTable::getTrustTableEntryByNodeId(Ipv4Address nodeId)
