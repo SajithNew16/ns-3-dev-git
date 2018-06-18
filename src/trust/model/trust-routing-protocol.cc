@@ -463,6 +463,7 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
 //      m_backupTable.printTable();
       //Trust levels classification
       TrustLevelClassifier trustLevelClassifier;
+      trustLevelClassifier.SetBackupTable (&m_backupTable);
       trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
       return route;
@@ -2418,6 +2419,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  	}
 		    //Trust levels classification
 		    TrustLevelClassifier trustLevelClassifier;
+		    trustLevelClassifier.SetBackupTable (&m_backupTable);
 		    trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 	     }
 
@@ -2541,7 +2543,9 @@ RoutingProtocol::ExecuteFirst ()
   m_backupTable.printTable();
   //Trust levels classification
   TrustLevelClassifier trustLevelClassifier;
+  trustLevelClassifier.SetBackupTable(&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+
 
 }
 

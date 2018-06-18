@@ -48,19 +48,29 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 				//reduce trust here
 			}
 			else
-			{
-				it->setTrustLevel(4);
+			  {
 				//call spiral model method
-			/*	Spiral model;
+				Spiral spiralModel;
 				double *past_global_trust_range;
-				past_global_trust_range = model.getMinMaxTrust(trustTable);*/
-//				std::cout << "Max GT:- " << past_global_trust_range[1] << std::endl;
+				past_global_trust_range = spiralModel.GetMinMaxTrust (this->backupTable);
+				if (node_GT < past_global_trust_range[0] || node_GT > past_global_trust_range[1])
+				  {
+					it->setTrustLevel(5);
+				  }
+				else
+				  {
+					it->setTrustLevel(4);
+				  }
 //				model.addMaliciousCategory(past_global_trust_range, trustTable);
-			}
+			  }
 		}
 	}
 }
 
+void
+TrustLevelClassifier::SetBackupTable (BackupTable* backupTable) {
+	this->backupTable = backupTable;
+}
 
 double TrustLevelClassifier::calculateReductionFactor(int interactions, double globalTrust)
 {
