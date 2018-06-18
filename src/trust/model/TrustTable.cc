@@ -20,6 +20,9 @@ void TrustTable::addTrustTableEntry(TrustTableEntry entry)
 
 void TrustTable::removeTrustTableEntry(TrustTableEntry entry)
 {
+//  not allowed to delete yet
+//	trustTableRecords.erase(trustTableRecords.begin()+2);
+//	trustTableRecords.erase(std::remove(trustTableRecords.begin(), trustTableRecords.end(), entry.getGlobalTrust()), trustTableRecords.end());
 //	std::cout <<"Removing " << entry.getDestinationNode() << std::endl;
 //	entry.
 //	trustTableRecords.pop_back(); //need to change this

@@ -28,8 +28,15 @@ BackupTable::printTable()
 {
 	std::cout << ">>>>>>>>>>>>>> Backup Table <<<<<<<<<<<<<<<" << std::endl;
 	std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator << "Analyzed Result" << std::endl;
+//	int index = backupTableRecords.size()-1;
 	for (std::vector<BackupTableEntry>::iterator it = backupTableRecords.begin(); it != backupTableRecords.end(); it++)
 	{
+		/*if (index)
+		  {
+			std::cout << "| " << backupTableRecords.at(index).getNeiNode() << columnSeperator << backupTableRecords.at(index).getTrustValue() << "\t" << columnSeperator << backupTableRecords.at(index).GetTimeDuration() << "\t\t" << columnSeperator << backupTableRecords.at(index).GetResult() << std::endl;
+
+			index--;
+		  }*/
 		std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
 	}
 }

@@ -471,8 +471,6 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       //Trust levels classification
       TrustLevelClassifier trustLevelClassifier;
       trustLevelClassifier.SetBackupTable (&m_backupTable);
-      //set flag to inform TrustLevelClassifier has finished classifying nodes in ExecuteFirst method.
-      trustLevelClassifier.SetAfterExecuteFirstFlag(2);
       trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
       return route;
@@ -2437,8 +2435,6 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		    //Trust levels classification
 		    TrustLevelClassifier trustLevelClassifier;
 		    trustLevelClassifier.SetBackupTable (&m_backupTable);
-		    //set flag to inform TrustLevelClassifier has finished classifying nodes in ExecuteFirst method.
-		    trustLevelClassifier.SetAfterExecuteFirstFlag(2);
 		    trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 	     }
 
@@ -2576,6 +2572,13 @@ RoutingProtocol::ExecuteFirst ()
 void
 RoutingProtocol::ExecuteLast ()
 {
+  //Trust levels classification
+  TrustLevelClassifier trustLevelClassifier;
+  //set flag to inform TrustLevelClassifier that all the transmissions have happened.
+  trustLevelClassifier.SetAfterExecuteFirstFlag(2);
+  trustLevelClassifier.SetBackupTable(&m_backupTable);
+  trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+
   //print trust table after all the packet transmissions happened
   std::cout << "\n  ================== Printing trust tables at the end ==================" << std::endl;
   m_trustTable.printTable();

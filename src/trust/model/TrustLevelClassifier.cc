@@ -4,6 +4,7 @@
 #include "TrustTableEntry.h"
 #include "DirTrustCal.h"
 #include "Spiral.h"
+#include "TrustInfoReceiver.h"
 #include <vector>
 #include <iostream>
 
@@ -53,18 +54,33 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 				Spiral spiralModel;
 				double *past_global_trust_range;
 				past_global_trust_range = spiralModel.GetMinMaxTrust (this->backupTable);
+				TrustInfoReceiver trustInfoReceiver;
 				if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
 				  {
 					it->setTrustLevel(4);
-					if(this->afterExecuteFirstFlag == 2)
+					if (this->afterExecuteFirstFlag == 2)
 					  {
 					    trustTable->removeTrustTableEntry(*it);
-					    it->setTrustLevel(41);
+					    it->setTrustLevel(4);
+					    trustInfoReceiver.sendMaliciousBroadcast(it->getDestinationNode());
 					  }
 				  }
 				else
 				  {
 					it->setTrustLevel(5);
+					it->setBlacklist(true);
+					//neighbour_node_list = getRecommendedNodes(inputNode);
+					//reduce_factor = calculateReduceFactor(input_node);
+					//for (int i = 0; i<neighbour_node_array.length(); i++) {
+					//  recalculateIndirectTrust(neighbour_node, reduce_factor);
+					//	updateGlobalTrust(node);
+					//}
+
+					//Broadcast to the others that this is a collaborative malicious nodes
+					trustInfoReceiver.sendMaliciousBroadcast(it->getDestinationNode());
+
+					//broadcastToNeighbors(input_node,"Collaborative malicious node");
+					// GOTO Identifying_trust_levels
 				  }
 //				model.addMaliciousCategory(past_global_trust_range, trustTable);
 			  }
