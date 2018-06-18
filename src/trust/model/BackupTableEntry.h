@@ -22,9 +22,9 @@ public:
 	void setTrustValue(double trustValue);
 	double getTrustValue();
 	void updateTrustValue(double trustValue);
-	void setResult(std::string result);
+	void SetResult (std::string result);
 	void updateResult(std::string result);
-	std::string getResult();
+	std::string GetResult ();
 	void SetTimeDuration (Time timeDuration);
 	Time GetTimeDuration ();
 	void updateTimeDuration(Time timeDuration);

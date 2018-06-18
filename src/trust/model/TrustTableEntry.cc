@@ -30,13 +30,6 @@ Ipv4Address TrustTableEntry::getDestinationNode() {
 
 void TrustTableEntry::calculateGlobalTrust() {
 	this->globalTrust = this->dirTrust + this->indTrust;
-	/*BackupTableEntry entry;
-	 entry.setNeiNode(this->destinationNode);
-	 entry.setTrustValue(this->globalTrust);
-	 entry.setTimeDuration(2.5);
-
-	 BackupTable::getInstance()->addBackupTableEntry(entry);
-	 BackupTable::getInstance()->addToTrustList(this->globalTrust);*/
 }
 
 double TrustTableEntry::getGlobalTrust() {

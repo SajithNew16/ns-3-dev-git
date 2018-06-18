@@ -23,13 +23,14 @@ std::vector<BackupTableEntry>& BackupTable::getBackupTableEntries()
 	return backupTableRecords;
 }
 
-void BackupTable::printTable()
+void
+BackupTable::printTable()
 {
 	std::cout << ">>>>>>>>>>>>>> Backup Table <<<<<<<<<<<<<<<" << std::endl;
 	std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator << "Analyzed Result" << std::endl;
 	for (std::vector<BackupTableEntry>::iterator it = backupTableRecords.begin(); it != backupTableRecords.end(); it++)
 	{
-		std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->getResult() << std::endl;
+		std::cout << "| " << it->getNeiNode() << columnSeperator << it->getTrustValue() << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
 	}
 }
 

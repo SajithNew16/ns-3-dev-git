@@ -34,7 +34,8 @@ void BackupTableEntry::updateTrustValue(double trustValue)
 	this->trustValue = trustValue;
 }
 
-void BackupTableEntry::setResult(std::string result)
+void
+BackupTableEntry::SetResult (std::string result)
 {
 	this->result = result;
 }
@@ -44,7 +45,8 @@ void BackupTableEntry::updateResult(std::string result)
 	this->result = result;
 }
 
-std::string BackupTableEntry::getResult()
+std::string
+BackupTableEntry::GetResult ()
 {
 	return this->result;
 }

@@ -446,7 +446,6 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       		double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
       		it->updateIndirectTrust(ind_trust_value);
       		it->calculateGlobalTrust();
-      		//TODO: inside above calculateGlobalTrust() need to update backupTable.
       	}
       //add entries to m_backupTable
       std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
@@ -457,6 +456,14 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
       		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
       		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(1));
+      		if (it->getGlobalTrust() <= 0.3)
+      		  {
+      		    backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
+      		  }
+      		else
+      		  {
+      		  	backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
+      		  }
       		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
       		index++;
       	}
@@ -2414,7 +2421,16 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
 		  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
 		  		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(3));
-		  		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+		  		if (it->getGlobalTrust() <= 0.3)
+		  		  {
+		  		    backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
+		  		  }
+		  		else
+		  		  {
+		  		  	backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
+		  		  }
+
+		  		m_backupTable.addBackupTableEntry (backup_entry_vector.at(index));
 		  		index++;
 		  	}
 		    //Trust levels classification
@@ -2525,7 +2541,6 @@ RoutingProtocol::ExecuteFirst ()
       double ind_trust_value = indTrustCal.calculateIndirectTrust (*it);
       it->updateIndirectTrust (ind_trust_value);
       it->calculateGlobalTrust ();
-      //TODO: inside above calculateGlobalTrust() need to update backupTable.
     }
   //add entries to m_backupTable
   std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
@@ -2536,6 +2551,14 @@ RoutingProtocol::ExecuteFirst ()
   		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
   		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
   		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now());
+  		if (it->getGlobalTrust() <= 0.3)
+  		  {
+  			backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
+  		  }
+  		else
+  		  {
+  			backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
+  		  }
   		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
   		index++;
   	}
