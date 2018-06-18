@@ -56,7 +56,11 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 				if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
 				  {
 					it->setTrustLevel(4);
-//					trustTable->removeTrustTableEntry(*it);
+					if(this->afterExecuteFirstFlag == 2)
+					  {
+					    trustTable->removeTrustTableEntry(*it);
+					    it->setTrustLevel(41);
+					  }
 				  }
 				else
 				  {
@@ -87,6 +91,12 @@ double TrustLevelClassifier::recalculateIndirectTrust(double indirectTrust, doub
 	indirectTrust = indirectTrust - reductionFactor;
 	//update global trust
 	return indirectTrust;
+}
+
+void
+TrustLevelClassifier::SetAfterExecuteFirstFlag (uint afterExecuteFirstFlag)
+{
+	this->afterExecuteFirstFlag = afterExecuteFirstFlag;
 }
 
 TrustLevelClassifier::~TrustLevelClassifier()

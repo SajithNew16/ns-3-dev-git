@@ -471,6 +471,8 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       //Trust levels classification
       TrustLevelClassifier trustLevelClassifier;
       trustLevelClassifier.SetBackupTable (&m_backupTable);
+      //set flag to inform TrustLevelClassifier has finished classifying nodes in ExecuteFirst method.
+      trustLevelClassifier.SetAfterExecuteFirstFlag(2);
       trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
       return route;
@@ -2399,7 +2401,7 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 			  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
 			  m_recommendationTable.printTable();
 			  //change the flag in IndTrustCal class in order to notify TRR reply packet get received
-			  indTrustCal.SetFlag (2);
+			  indTrustCal.SetTrrRecFlag (2);
 			  //recalculate trust values after getting recommendations from neighbor nodes
 			  indTrustCal.setTrustTable (&m_trustTable);
 			  indTrustCal.SetTrrTable (&m_TRRTable);
@@ -2409,7 +2411,6 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 			  	  double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
 			  	  it->updateIndirectTrust(ind_trust_value);
 			  	  it->calculateGlobalTrust();
-			  	  //TODO: inside above calculateGlobalTrust() need to update backupTable.
 			  	}
 		     }
 		    //add entries to m_backupTable
@@ -2436,6 +2437,8 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		    //Trust levels classification
 		    TrustLevelClassifier trustLevelClassifier;
 		    trustLevelClassifier.SetBackupTable (&m_backupTable);
+		    //set flag to inform TrustLevelClassifier has finished classifying nodes in ExecuteFirst method.
+		    trustLevelClassifier.SetAfterExecuteFirstFlag(2);
 		    trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 	     }
 
@@ -2518,9 +2521,8 @@ void RoutingProtocol::execute() {
 			sendTRR(iface.GetLocal () , it2->getDestinationNode(), selectedTarget);
 		}
 	}
-	std::cout << "\n  ================== Printing trust table ==================" << std::endl;
 //	m_recommendationTable.printTable();
-	m_trustTable.printTable();
+//	m_trustTable.printTable();
 //	m_backupTable.printTable();
 }
 
@@ -2562,14 +2564,13 @@ RoutingProtocol::ExecuteFirst ()
   		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
   		index++;
   	}
-//  m_trustTable.printTable();
-  m_backupTable.printTable();
+
   //Trust levels classification
   TrustLevelClassifier trustLevelClassifier;
   trustLevelClassifier.SetBackupTable(&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
-
-
+  m_trustTable.printTable();
+  m_backupTable.printTable();
 }
 
 void

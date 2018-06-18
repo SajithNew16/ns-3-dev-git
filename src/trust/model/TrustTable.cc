@@ -20,6 +20,7 @@ void TrustTable::addTrustTableEntry(TrustTableEntry entry)
 
 void TrustTable::removeTrustTableEntry(TrustTableEntry entry)
 {
+//	std::cout <<"Removing " << entry.getDestinationNode() << std::endl;
 //	entry.
 //	trustTableRecords.pop_back(); //need to change this
 }

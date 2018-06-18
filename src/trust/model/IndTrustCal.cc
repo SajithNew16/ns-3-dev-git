@@ -79,7 +79,7 @@ IndTrustCal::sendTRR (TrustTableEntry node, TrustTableEntry targetNode) {
 	rec[0] = 0.5;
 	rec[1] = 0.6;
 
-    if (this->flag1 == 2)
+    if (this->trrRecFlag == 2)
 	  {
 		  for (std::vector<TRRTableEntry>::iterator it = this->trrTable->getTrrTableEntries().begin(); it != this->trrTable->getTrrTableEntries().end(); it++)
 		    {
@@ -193,12 +193,14 @@ IndTrustCal::calculateIndirectTrust (TrustTableEntry targetNode) {
 }
 
 void
-IndTrustCal::SetFlag (uint flag1) {
-	this->flag1 = flag1;
+IndTrustCal::SetTrrRecFlag (uint trrRecFlag)
+{
+	this->trrRecFlag = trrRecFlag;
 }
 
 void
-IndTrustCal::SetTrrTable (TRRTable* trrTable) {
+IndTrustCal::SetTrrTable (TRRTable* trrTable)
+{
 	this->trrTable = trrTable;
 }
 

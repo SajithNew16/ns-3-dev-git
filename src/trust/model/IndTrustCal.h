@@ -14,7 +14,7 @@ class IndTrustCal
 private:
 	TRRTable* trrTable;
 	TrustTable* trustTable;
-	uint flag1;
+	uint trrRecFlag;
 public:
 	IndTrustCal();
 	double* sendTRR(TrustTableEntry node, TrustTableEntry targetNode);
@@ -25,7 +25,7 @@ public:
 	void setTrustTable(TrustTable* trustTable);
 	double calculateIndirectTrust(TrustTableEntry targetNode);
     ///This SetFlag method will call when TRR reply packet get received
-	void SetFlag (uint flag1);
+	void SetTrrRecFlag (uint trrRecFlag);
 	void SetTrrTable (TRRTable* trrTable);
 	~IndTrustCal();
 };
