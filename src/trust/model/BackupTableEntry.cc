@@ -9,29 +9,28 @@ BackupTableEntry::BackupTableEntry()
 {
 }
 
-void BackupTableEntry::setNeiNode(Ipv4Address neiNode)
+void
+BackupTableEntry::SetNeiNode (Ipv4Address neiNode)
 {
 	this->neiNode = neiNode;
 }
 
-Ipv4Address BackupTableEntry::getNeiNode()
+Ipv4Address
+BackupTableEntry::GetNeiNode ()
 {
 	return this->neiNode;
 }
 
-void BackupTableEntry::setTrustValue(double trustValue)
+void
+BackupTableEntry::SetTrustValue (double trustValue)
 {
 	this->trustValue = trustValue;
 }
 
-double BackupTableEntry::getTrustValue()
+double
+BackupTableEntry::GetTrustValue ()
 {
 	return this->trustValue;
-}
-
-void BackupTableEntry::updateTrustValue(double trustValue)
-{
-	this->trustValue = trustValue;
 }
 
 void
@@ -40,13 +39,8 @@ BackupTableEntry::SetResult (std::string result)
 	this->result = result;
 }
 
-void BackupTableEntry::updateResult(std::string result)
-{
-	this->result = result;
-}
-
 std::string
-BackupTableEntry::GetResult ()
+BackupTableEntry::GetResult()
 {
 	return this->result;
 }
@@ -58,14 +52,9 @@ BackupTableEntry::SetTimeDuration (Time timeDuration)
 }
 
 Time
-BackupTableEntry::GetTimeDuration ()
+BackupTableEntry::GetTimeDuration()
 {
 	return this->timeDuration;
-}
-
-void BackupTableEntry::updateTimeDuration(Time timeDuration)
-{
-	this->timeDuration = timeDuration;
 }
 
 BackupTableEntry::~BackupTableEntry()

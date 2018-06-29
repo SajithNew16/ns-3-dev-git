@@ -52,42 +52,45 @@ void Spiral::addMaliciousCategory(double* past_global_trust_range, TrustTable* t
 	}
 }
 
-
 double *
-Spiral::GetMinMaxTrust (BackupTable* backupTable)
+Spiral::GetMinMaxTrust (BackupTable* backupTable, TrustTableEntry trustTableEntry)
 {
 	std::vector<BackupTableEntry>& entry = backupTable->getBackupTableEntries();
-	std::vector<double> trust_list;
+    std::vector<double> trust_list;
 
 	for (std::vector<BackupTableEntry>::iterator it = entry.begin(); it != entry.end(); it++)
-	 {
-		trust_list.push_back(it->getTrustValue());
-	 }
+	  {
+		if (trustTableEntry.getDestinationNode () == it->GetNeiNode ())
+		  {
+	        trust_list.push_back (it->GetTrustValue());
+		  }
+	  }
 
 	static double past_global_trust_range[2];
 
 	double min = trust_list[0];
 	for (unsigned int i = 0; i < trust_list.size(); i++)
-	 {
-		if (trust_list[i] < min)
-		 {
-			min = trust_list[i];
-		 }
-	 }
+	  {
+	    if (trust_list[i] < min)
+		  {
+		    min = trust_list[i];
+		  }
+	  }
+
 	past_global_trust_range[0] = min;
 	double max = trust_list[0];
 	for (unsigned int i = 0; i < trust_list.size(); i++)
-	 {
-		if (trust_list[i] > max)
-		 {
-			max = trust_list[i];
-		 }
-	 }
+	  {
+	    if (trust_list[i] > max)
+		  {
+		    max = trust_list[i];
+		  }
+	  }
 	past_global_trust_range[1] = max;
 
 	return past_global_trust_range;
-
 }
+
 
 Spiral::~Spiral()
 {

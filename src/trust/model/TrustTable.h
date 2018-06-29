@@ -12,12 +12,13 @@ namespace trust
 class TrustTable
 {
 private:
-    std::string columnSeperator;
+  std::string columnSeperator;
 	std::vector<TrustTableEntry> trustTableRecords;
 public:
-    TrustTable();
+  TrustTable();
 	void addTrustTableEntry(TrustTableEntry entry);
 	void removeTrustTableEntry(TrustTableEntry entry);
+	void removeTrustTableEntryByIndex (TrustTableEntry entry,int index);
 	TrustTableEntry* getTrustTableEntryByNodeId(Ipv4Address nodeId);
 	std::vector<TrustTableEntry> getBlacklistedTrustTableEntries();
 	std::vector<TrustTableEntry>& getTrustTableEntries();

@@ -55,11 +55,11 @@ void RecommendationTable::setRecommendationTable(std::vector<RecommendationTable
 
 void RecommendationTable::printTable()
 {
-	std::cout << "| " << "Neighbor Node" << columnSeperator << "Recommending Nodes" << columnSeperator << "Recommending Value" << columnSeperator << "Matuarity Level" << columnSeperator << "Blacklist" << std::endl;
+	std::cout << "| " << "Neighbor Node" << columnSeperator << "Recommending Nodes" << columnSeperator << "Recommending Value(DT)" << columnSeperator <<"Recommending Value(GT)" << "\t" << columnSeperator << "Matuarity Level" << "\t" << columnSeperator << "Blacklist" << std::endl;
 
 	for (std::vector<RecommendationTableEntry>::iterator it = recommendationTableRecords.begin(); it != recommendationTableRecords.end(); it++)
 	{
-	std::cout << "| " << it->getneighborNodeId() << "\t\t" << columnSeperator << it->getRecommendingNodes() << "\t\t" << columnSeperator << it->getrecValue() << "\t\t" << columnSeperator << it->getMaturityLevel() << "\t\t" << columnSeperator << "" << "\t\t" << columnSeperator << std::endl;
+	std::cout << "| " << it->getneighborNodeId() << "\t" << columnSeperator << it->getRecommendingNodes() << "\t\t" << columnSeperator << it->getrecValue_DT() << "\t\t" << columnSeperator << it->getrecValue_GT() << "\t\t" << columnSeperator << it->getMaturityLevel() << "\t\t" << columnSeperator << it->getBlacklistStatus() << "\t\t" << columnSeperator << std::endl;
 	}
 }
 

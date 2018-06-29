@@ -306,6 +306,11 @@ RoutingProtocol::GetTypeId (void)
                    StringValue ("ns3::UniformRandomVariable"),
                    MakePointerAccessor (&RoutingProtocol::m_uniformRandomVariable),
                    MakePointerChecker<UniformRandomVariable> ())
+    .AddAttribute ("IsMalicious", "Is the node malicious",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&RoutingProtocol::SetMaliciousEnable,
+                                        &RoutingProtocol::GetMaliciousEnable),
+                   MakeBooleanChecker ())
   ;
   return tid;
 }
@@ -382,11 +387,16 @@ RoutingProtocol::Start ()
                                     this);
   m_rerrRateLimitTimer.Schedule (Seconds (1));
 
-  Simulator::Schedule (Seconds (1), &RoutingProtocol::ExecuteFirst, this);
+  Simulator::Schedule (Seconds (10), &RoutingProtocol::ExecuteFirst, this);
 
-  Simulator::Schedule (Seconds (3), &RoutingProtocol::execute, this);
+  Simulator::Schedule (Seconds (30), &RoutingProtocol::execute, this);
 
-  Simulator::Schedule (Seconds (9), &RoutingProtocol::ExecuteLast, this);
+  Simulator::Schedule (Seconds (40), &RoutingProtocol::ExecuteBroadcastMal, this);
+
+  Simulator::Schedule (Seconds (50), &RoutingProtocol::ExecuteSpiralEnd, this);
+
+  Simulator::Schedule (Seconds (90), &RoutingProtocol::ExecuteLast, this);
+
 }
 
 Ptr<Ipv4Route>
@@ -439,39 +449,40 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       //indirect trust calculation
       IndTrustCal indTrustCal;
       indTrustCal.setTrustTable(&m_trustTable);
+      indTrustCal.setRecommendationTable(&m_recommendationTable);
       std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
 
       for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
       	{
-      		double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
-      		it->updateIndirectTrust(ind_trust_value);
-      		it->calculateGlobalTrust();
+      	  double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
+      	  it->updateIndirectTrust(ind_trust_value);
+      	  it->calculateGlobalTrust();
       	}
-      //add entries to m_backupTable
-      std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
-      std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size()*2);
-      int index = trust_entry_vector.size();
-      for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
-      	{
-      		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
-      		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-      		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(1));
-      		if (it->getGlobalTrust() <= 0.3)
-      		  {
-      		    backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
-      		  }
-      		else
-      		  {
-      		  	backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
-      		  }
-      		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
-      		index++;
-      	}
-//      m_backupTable.printTable();
-      //Trust levels classification
-      TrustLevelClassifier trustLevelClassifier;
-      trustLevelClassifier.SetBackupTable (&m_backupTable);
-      trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+
+      std::vector<BackupTableEntry> backup_entry_vector(node_entry_vector.size()*2);
+      int index = node_entry_vector.size();
+      for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+        {
+          backup_entry_vector.at(index).SetNeiNode(it->getDestinationNode());
+          backup_entry_vector.at(index).SetTrustValue(it->getGlobalTrust());
+          backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(1));
+          if (it->getGlobalTrust() <= 0.3)
+            {
+              backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
+            }
+          else
+            {
+              backup_entry_vector.at(index).SetResult("Trustworthy, Partially Trustworthy or Selfish Nodes");
+            }
+          //add entries to m_backupTable
+          m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+          index++;
+        }
+
+      	//Trust levels classification
+      	TrustLevelClassifier trustLevelClassifier;
+      	trustLevelClassifier.SetBackupTable (&m_backupTable);
+      	trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
       return route;
     }
@@ -671,6 +682,15 @@ RoutingProtocol::Forwarding (Ptr<const Packet> p, const Ipv4Header & header,
   Ipv4Address origin = header.GetSource ();
   m_routingTable.Purge ();
   RoutingTableEntry toDst;
+  /* Code added by Shalini Satre, Wireless Information Networking Group (WiNG), NITK Surathkal for simulating Blackhole Attack */
+  /* Check if the node is suppose to behave maliciously */
+  if (IsMalicious)
+    {  //When malicious node receives packet it drops the packet.
+      std::cout << "Launching Blackhole Attack! Packet dropped . . . \n";
+      return true;
+    }
+  /* Code for Blackhole attack simulation ends here */
+
   if (m_routingTable.LookupRoute (dst, toDst))
     {
       if (toDst.GetFlag () == VALID)
@@ -1259,9 +1279,14 @@ RoutingProtocol::RecvTrust (Ptr<Socket> socket)
       }
     case TRUSTTYPE_TRR:
 	  {
-		RecvTrr (sender, packet);
+		RecvTrr(sender, packet);
 		break;
 	  }
+    case TRUSTTYPE_MAL:
+      {
+        RecvMal (sender, packet);
+        break;
+      }
     }
 }
 
@@ -1327,8 +1352,8 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
   {
 	 m_trustTable.addTrustTableEntry(trustTableEntry);
   }
-
- /* //populate recommendation table
+/*
+  //populate recommendation table
   RecommendationTableEntry recommendationTableEntry;
   recommendationTableEntry.setNeighborNodeId(sender);
   int recCount = 0;
@@ -1345,8 +1370,8 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
   if(recCount == 0)
   {
 	 m_recommendationTable.addRecommendationTableEntry(recommendationTableEntry);
-  }*/
-
+  }
+*/
 }
 
 void
@@ -1471,7 +1496,7 @@ RoutingProtocol::RecvRequest (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address s
    */
   RoutingTableEntry toDst;
   Ipv4Address dst = rreqHeader.GetDst ();
-  if (m_routingTable.LookupRoute (dst, toDst))
+  if (IsMalicious || m_routingTable.LookupRoute (dst, toDst))
     {
       /*
        * Drop RREQ, This node RREP wil make a loop.
@@ -1487,12 +1512,37 @@ RoutingProtocol::RecvRequest (Ptr<Packet> p, Ipv4Address receiver, Ipv4Address s
        * However, the forwarding node MUST NOT modify its maintained value for the destination sequence number, even if the value
        * received in the incoming RREQ is larger than the value currently maintained by the forwarding node.
        */
-      if ((rreqHeader.GetUnknownSeqno () || (int32_t (toDst.GetSeqNo ()) - int32_t (rreqHeader.GetDstSeqno ()) >= 0))
-          && toDst.GetValidSeqNo () )
+      if (IsMalicious || ((rreqHeader.GetUnknownSeqno () || (int32_t (toDst.GetSeqNo ()) - int32_t (rreqHeader.GetDstSeqno ()) >= 0))
+          && toDst.GetValidSeqNo () ))
         {
-          if (!rreqHeader.GetDestinationOnly () && toDst.GetFlag () == VALID)
+          if (IsMalicious || (!rreqHeader.GetDestinationOnly () && toDst.GetFlag () == VALID))
             {
               m_routingTable.LookupRoute (origin, toOrigin);
+              /* Code added by Shalini Satre, Wireless Information Networking Group (WiNG), NITK Surathkal for simulating Blackhole Attack
+               * If node is malicious, it creates false routing table entry having sequence number much higher than
+               * that in RREQ message and hop count as 1.
+               * Malicious node itself sends the RREP message,
+               * so that the route will be established through malicious node.
+               */
+              if (IsMalicious)
+                {
+                  Ptr<NetDevice> dev = m_ipv4->GetNetDevice (m_ipv4->GetInterfaceForAddress (receiver));
+                  RoutingTableEntry falseToDst (dev,
+                                                dst,
+                                                true,
+                                                rreqHeader.GetDstSeqno () + 100,
+                                                m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver),
+                                                                    0),
+                                                1,
+                                                dst,
+                                                m_activeRouteTimeout);
+
+                  SendReplyByIntermediateNode (falseToDst,
+                                               toOrigin,
+                                               rreqHeader.GetGratuitousRrep ());
+                  return;
+                }
+              /* Code for Blackhole Attack Simulation ends here */
               SendReplyByIntermediateNode (toDst, toOrigin, rreqHeader.GetGratuitousRrep ());
               return;
             }
@@ -1581,6 +1631,12 @@ RoutingProtocol::SendReplyByIntermediateNode (RoutingTableEntry & toDst, Routing
   /* If the node we received a RREQ for is a neighbor we are
    * probably facing a unidirectional link... Better request a RREP-ack
    */
+  ///Attract node to set up path through malicious node
+  //Shalini Satre
+  if (IsMalicious)
+    {
+      rrepHeader.SetHopCount (1);
+    }
   if (toDst.GetHop () == 1)
     {
       rrepHeader.SetAckRequired (true);
@@ -2366,81 +2422,48 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
   packet->RemoveHeader(trrHeader);
 
   if (IsMyOwnAddress (trrHeader.GetOrigin()))
-    {
+  {
 	  std::cout << "TRR BACK TO HOME!!! "<< std::endl;
-  //  rec = sendTRR(node, targetNode);
+//	  rec = sendTRR(node, targetNode);
 	  Time time (MilliSeconds (trrHeader.GetTrrLifetime()));
 	  Time currentTime = Simulator::Now();
+	  double originalGT =(trrHeader.GetGT()) / 100000.0;
+	  double originalDT =(trrHeader.GetDT()) / 100000.0;
 
-	  if ((currentTime - time).GetSeconds() < Time(15e10).GetSeconds())
-	    {
-		  double originalDT = (trrHeader.GetDT()) / 100000.0;
-		  double originalGT = (trrHeader.GetGT()) / 100000.0;
-		  TRRTableEntry trrTableentry;
+	  if((currentTime - time).GetSeconds() < Time(15e9).GetSeconds()){
+
+		  TRRTableEntry entry;
+		  entry.setSentTime(time);
+		  entry.setReceivedTime(currentTime);
+		  entry.setDirectTrust((int)(trrHeader.GetDT()) / 100000.0);
+		  entry.setGlobalTrust((int)(trrHeader.GetGT()) / 100000.0);
+		  entry.setTargetNodeId(trrHeader.GetTarget());
+		  std::cout << "adding the TRR table entry "<< std::endl;
+		  m_TRRTable.addTrrTableEntry(entry);
+	  //  m_TRRTable.printTable();
+
 		  RecommendationTableEntry recTableEntry;
-		  IndTrustCal indTrustCal;
+		  recTableEntry.setNeighborNodeId(sender);	//not sure about the parameter
+		  recTableEntry.setRecommendingNode(trrHeader.GetDst());//not sure about the parameter
+		  recTableEntry.setRecValue_GT(originalGT);
+		  recTableEntry.setRecValue_DT(originalDT);
+		  recTableEntry.calculateMaturityLevel(m_trustTable.getTrustTableEntries());
 
-		  if (trrHeader.GetDst() != trrHeader.GetTarget())
-		    {
-              std::cout << "adding the TRR table entry "<< std::endl;
-              trrTableentry.SetDestinationNodeId (trrHeader.GetDst());
-              trrTableentry.setSenderNodeId(trrHeader.GetOrigin());
-              trrTableentry.setSentTime(time);
-              trrTableentry.setReceivedTime(currentTime);
-              trrTableentry.setDirectTrust(originalDT);
-              trrTableentry.setGlobalTrust(originalGT);
-              trrTableentry.setTargetNodeId(trrHeader.GetTarget());
-			  m_TRRTable.addTrrTableEntry(trrTableentry);
-			  m_TRRTable.printTable();
-			  recTableEntry.SetRecommendingNodes(trrHeader.GetTarget());
-			  recTableEntry.setNeighborNodeId(trrHeader.GetDst());
-			  recTableEntry.setRecValue(originalGT);
-			  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
-			  std::cout << "##############Printing Recommendation table#############3"<< std::endl;
-			  m_recommendationTable.printTable();
-			  //change the flag in IndTrustCal class in order to notify TRR reply packet get received
-			  indTrustCal.SetTrrRecFlag (2);
-			  //recalculate trust values after getting recommendations from neighbor nodes
-			  indTrustCal.setTrustTable (&m_trustTable);
-			  indTrustCal.SetTrrTable (&m_TRRTable);
-			  std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
-			  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
-			    {
-			  	  double ind_trust_value = indTrustCal.calculateIndirectTrust(*it);
-			  	  it->updateIndirectTrust(ind_trust_value);
-			  	  it->calculateGlobalTrust();
-			  	}
-		     }
-		    //add entries to m_backupTable
-		    std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
-		  	std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size()*3);
-		  	int index = trust_entry_vector.size()*2;
-		  	for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
-		  	{
-		  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
-		  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-		  		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(3));
-		  		if (it->getGlobalTrust() <= 0.3)
-		  		  {
-		  		    backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
-		  		  }
-		  		else
-		  		  {
-		  		  	backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
-		  		  }
+		  std::vector<TrustTableEntry> node_entry_list = m_trustTable.getTrustTableEntries();
 
-		  		m_backupTable.addBackupTableEntry (backup_entry_vector.at(index));
-		  		index++;
-		  	}
-		    //Trust levels classification
-		    TrustLevelClassifier trustLevelClassifier;
-		    trustLevelClassifier.SetBackupTable (&m_backupTable);
-		    trustLevelClassifier.identifyTrustLevel (&m_trustTable);
-	     }
+		  for (std::vector<TrustTableEntry>::iterator it = node_entry_list.begin();it != node_entry_list.end(); it++) {
+			if(sender == it->getDestinationNode()){
+			  recTableEntry.blacklistNode(it->getBlacklist());
+			}
+		  }
+		  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
+		  std::cout << "    "<< std::endl;
+		  std::cout << "##############Printing Recommendation table#############"<< std::endl;
+		  m_recommendationTable.printTable();
+	  }
 
-      return;
-
-    }
+    return;
+  }
 
   bool status = false;
 
@@ -2517,21 +2540,21 @@ void RoutingProtocol::execute() {
 			sendTRR(iface.GetLocal () , it2->getDestinationNode(), selectedTarget);
 		}
 	}
+	std::cout << "\n  ================== Printing trust table ==================" << std::endl;
 //	m_recommendationTable.printTable();
-//	m_trustTable.printTable();
-//	m_backupTable.printTable();
+	m_trustTable.printTable();
 }
 
 void
 RoutingProtocol::ExecuteFirst ()
 {
   DirTrustCal dirCalculator;
-  //Calculate Direct Trust at the beginning.
   dirCalculator.calculateDirectTrust (&m_trustTable);
 
-  //Calculate indirect trust at the beginning.
   IndTrustCal indTrustCal;
   indTrustCal.setTrustTable (&m_trustTable);
+  indTrustCal.setRecommendationTable (&m_recommendationTable);
+
   std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries();
 
   for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
@@ -2540,50 +2563,206 @@ RoutingProtocol::ExecuteFirst ()
       it->updateIndirectTrust (ind_trust_value);
       it->calculateGlobalTrust ();
     }
-  //add entries to m_backupTable
-  std::vector<TrustTableEntry>& trust_entry_vector = m_trustTable.getTrustTableEntries();
-  std::vector<BackupTableEntry> backup_entry_vector(trust_entry_vector.size());
+
+  std::vector<BackupTableEntry> backup_entry_vector(node_entry_vector.size());
   int index = 0;
-  for (std::vector<TrustTableEntry>::iterator it = trust_entry_vector.begin(); it != trust_entry_vector.end(); it++)
-  	{
-  		backup_entry_vector.at(index).setNeiNode(it->getDestinationNode());
-  		backup_entry_vector.at(index).setTrustValue(it->getGlobalTrust());
-  		backup_entry_vector.at(index).SetTimeDuration(Simulator::Now());
-  		if (it->getGlobalTrust() <= 0.3)
-  		  {
-  			backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
-  		  }
-  		else
-  		  {
-  			backup_entry_vector.at(index).SetResult("Not Pure or Collaborative malicious");
-  		  }
-  		m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
-  		index++;
-  	}
+  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
+    {
+      backup_entry_vector.at(index).SetNeiNode (it->getDestinationNode());
+      backup_entry_vector.at(index).SetTrustValue (it->getGlobalTrust());
+      backup_entry_vector.at(index).SetTimeDuration (Simulator::Now());
+      if (it->getGlobalTrust() <= 0.3)
+        {
+      	  backup_entry_vector.at(index).SetResult ("Pure or Collaborative malicious");
+      	}
+      else
+        {
+      	  backup_entry_vector.at(index).SetResult ("Trustworthy, Partially Trustworthy or Selfish Nodes");
+      	}
+      //add entries to m_backupTable
+      m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
+      index++;
+    }
 
   //Trust levels classification
   TrustLevelClassifier trustLevelClassifier;
-  trustLevelClassifier.SetBackupTable(&m_backupTable);
+  trustLevelClassifier.SetBackupTable (&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
-  m_trustTable.printTable();
   m_backupTable.printTable();
 }
+
+/**
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                    A ---------> B ---------> D                 |
+  |                    ^----------> C -----------^                 |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+* source: A
+* receiver: B
+*/
+void
+RoutingProtocol::SendMal (Ipv4Address source, Ipv4Address receiver)
+{
+  std::cout << "SENDING MAL TO " << receiver << " from " << source << std::endl;
+  // Create MAL header
+  MALHeader malHeader;
+  malHeader.SetDst (receiver);
+  malHeader.SetOrigin (source);
+  std::cout<<"MALLifeTime = " << Simulator::Now() <<std::endl;
+
+  Ipv4InterfaceAddress iface;
+
+  // Send MAL packet as subnet directed broadcast from each interface used by trust aodv
+  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j =
+	               m_socketAddresses.begin (); j != m_socketAddresses.end (); ++j)
+    {
+
+	  Ptr<Socket> socket = j->first;
+	  iface = j->second;
+
+	  Ptr<Packet> packet = Create<Packet> ();
+	  packet->AddHeader (malHeader);
+
+	  TypeHeader tHeader (TRUSTTYPE_MAL);
+	  packet->AddHeader (tHeader);
+	  socket->SendTo (packet, 0, InetSocketAddress (receiver, TRUST_PORT));
+
+    }
+}
+
+/**
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                    A ---------> B ---------> D                 |
+  |                     \----------> C ----------^                 |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+* receiver: B
+* sender: A
+*/
+void
+RoutingProtocol::RecvMal ( Ipv4Address sender, Ptr<Packet> packet )
+{
+	MALHeader malHeader(TRUSTTYPE_MAL);
+	packet->RemoveHeader(malHeader);
+
+  if (IsMyOwnAddress (malHeader.GetOrigin ()))
+    {
+      if (malHeader.GetPMalNode () != "102.102.102.102")
+        {
+          std::cout << malHeader.GetDst () << " saying " << malHeader.GetPMalNode () << " is a pure malicious node " <<  std::endl;
+        }
+      if (malHeader.GetCMalNode () != "102.102.102.102")
+        {
+          std::cout << malHeader.GetDst () << " saying " << malHeader.GetCMalNode () << " is a collaborative malicious node " << std::endl;
+        }
+      return;
+    }
+
+	bool status = false;
+
+	for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries().begin(); it != m_trustTable.getTrustTableEntries().end(); it++)
+	  {
+        if (it->getTrustLevel() == 4)
+	      {
+	        malHeader.SetPMalNode (it->getDestinationNode());
+	        status = true;
+	      }
+        if (it->getTrustLevel() == 5)
+        {
+          malHeader.SetCMalNode (it->getDestinationNode());
+          status = true;
+        }
+	  }
+
+	Ptr<Packet> packetReply = Create<Packet> ();
+	packetReply->AddHeader (malHeader);
+
+	TypeHeader tHeader (TRUSTTYPE_MAL);
+	packetReply->AddHeader (tHeader);
+
+	if(status)
+	  {
+	    RoutingTableEntry searchingRoutingEntry;
+		if(m_routingTable.LookupValidRoute(malHeader.GetOrigin(), searchingRoutingEntry))
+		  {
+		    Ptr<Socket> socket = FindSocketWithInterfaceAddress(searchingRoutingEntry.GetInterface ());
+		   	Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packetReply, sender);
+		  }
+	  }
+}
+
 
 void
-RoutingProtocol::ExecuteLast ()
+RoutingProtocol::ExecuteBroadcastMal ()
 {
-  //Trust levels classification
-  TrustLevelClassifier trustLevelClassifier;
-  //set flag to inform TrustLevelClassifier that all the transmissions have happened.
-  trustLevelClassifier.SetAfterExecuteFirstFlag(2);
-  trustLevelClassifier.SetBackupTable(&m_backupTable);
-  trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+	Ipv4InterfaceAddress iface;
 
-  //print trust table after all the packet transmissions happened
-  std::cout << "\n  ================== Printing trust tables at the end ==================" << std::endl;
-  m_trustTable.printTable();
-  m_backupTable.printTable();
+	for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j =
+		         m_socketAddresses.begin (); j != m_socketAddresses.end (); ++j)
+	  {
+	    Ptr<Socket> socket = j->first;
+		iface = j->second;
+	  }
+
+	for (std::vector<TrustTableEntry>::iterator mainItr = m_trustTable.getTrustTableEntries().begin(); mainItr != m_trustTable.getTrustTableEntries().end(); mainItr++)
+	  {
+
+		for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries().begin(); it2 != m_trustTable.getTrustTableEntries().end(); it2++)
+		  {
+			SendMal (iface.GetLocal () , it2->getDestinationNode());
+		  }
+	  }
+
+	std::cout << "mal packet trust table" << std::endl;
+	m_trustTable.printTable();
 }
+
+void RoutingProtocol::ExecuteSpiralEnd ()
+{
+  int index = 0;
+  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
+      it != m_trustTable.getTrustTableEntries ().end (); it++)
+    {
+      if (it->getTrustLevel () == 4)
+        {
+          m_trustTable.removeTrustTableEntryByIndex (*it, index);
+          break;
+        }
+      if (it->getTrustLevel () == 5)
+        {
+          //after transmission phase in our algorithm begins
+          //check received collaborative malicious nodes are already blacklisted
+          if (it->getBlacklist ())
+            {
+              m_trustTable.removeTrustTableEntryByIndex (*it,
+                                                         index);
+              break;
+              //broadcast to isolate
+            }
+          else
+            {
+              for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries ().begin ();
+                  it2 != m_trustTable.getTrustTableEntries ().end (); it2++)
+                {
+                  //blacklist collaborative malicious nodes if they are neighbors
+                  if (it2->getDestinationNode () == it->getDestinationNode ())
+                    {
+                      it->setBlacklist(true);
+                      //penalty process for neighbors of cm (did in spiral as well!)
+                      //broadcast to isolate
+                    }
+                  else
+                    {
+                      //broadcast to isolate
+                    }
+                }
+            }
+        }
+      index++;
+    }
+}
+
+
 
 void
 RoutingProtocol::DoInitialize (void)
@@ -2599,6 +2778,15 @@ RoutingProtocol::DoInitialize (void)
     }
   Ipv4RoutingProtocol::DoInitialize ();
 }
+
+void
+RoutingProtocol::ExecuteLast()
+{
+	std::cout << "-------After 9 seconds-------" << std::endl;
+	m_trustTable.printTable();
+	m_recommendationTable.printTable();
+}
+
 
 } //namespace trust
 } //namespace ns3

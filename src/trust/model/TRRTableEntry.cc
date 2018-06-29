@@ -31,18 +31,6 @@ void TRRTableEntry::setSenderNodeId(Ipv4Address senderNodeId)
 	this->senderNodeId = senderNodeId;
 }
 
-Ipv4Address
-TRRTableEntry::GetDestinationNodeId ()
-{
-	return this->destinationNodeId;
-}
-
-void
-TRRTableEntry::SetDestinationNodeId (Ipv4Address destinationNodeId)
-{
-	this->destinationNodeId = destinationNodeId;
-}
-
 double TRRTableEntry::getDirectTrust()
 {
 	return directTrust;

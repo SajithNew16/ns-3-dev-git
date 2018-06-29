@@ -48,7 +48,8 @@ enum MessageType
   TRUSTTYPE_RREP  = 2,   //!< TRUSTTYPE_RREP
   TRUSTTYPE_RERR  = 3,   //!< TRUSTTYPE_RERR
   TRUSTTYPE_RREP_ACK = 4, //!< TRUSTTYPE_RREP_ACK
-  TRUSTTYPE_TRR = 5		 //!< TRUSTTYPE_TRR
+  TRUSTTYPE_TRR = 5,	//!< TRUSTTYPE_TRR
+  TRUSTTYPE_MAL = 6		 //!< TRUSTTYPE_MAL
 };
 
 /**
@@ -634,8 +635,8 @@ public:
   /// c-tor
 	TRRHeader (uint32_t GT = 0, uint32_t DT = 0,
               uint32_t trrID = 0, Ipv4Address dst = Ipv4Address (),
-              uint32_t dstSeqNo = 0, Ipv4Address origin = Ipv4Address (), Ipv4Address target = Ipv4Address (),
-              uint32_t originSeqNo = 0, uint32_t trrLifetime = 0);
+              uint32_t dstSeqNo = 0, Ipv4Address origin = Ipv4Address (),
+              uint32_t originSeqNo = 0);
 
   //\{
   static TypeId GetTypeId ();
@@ -693,7 +694,58 @@ private:
 
 std::ostream & operator<< (std::ostream & os, TRRHeader const &);
 
+class MALHeader : public Header
+{
+public:
+  /// c-tor
+  MALHeader ( uint32_t malID = 0, Ipv4Address dst = Ipv4Address (), Ipv4Address origin = Ipv4Address (),
+		  Ipv4Address pmalNode = Ipv4Address (), Ipv4Address cmalNode = Ipv4Address ());
+  //\{
+  static TypeId GetTypeId ();
+  TypeId GetInstanceTypeId () const;
+  uint32_t GetSerializedSize () const;
+  void Serialize (Buffer::Iterator start) const;
+  uint32_t Deserialize (Buffer::Iterator start);
+  void Print (std::ostream &os) const;
+  //\}
 
+  ///\name Fields
+  //\{
+
+  void SetId (uint32_t id) { m_malID = id; }
+  uint32_t GetId () const { return m_malID; }
+  void SetDst (Ipv4Address a) { m_dst = a; }
+  Ipv4Address GetDst () const { return m_dst; }
+  void SetPMalNode (Ipv4Address a) { m_pmalNode = a; }
+  Ipv4Address GetPMalNode () const { return m_pmalNode; }
+  void SetCMalNode (Ipv4Address a) { m_cmalNode = a; }
+  Ipv4Address GetCMalNode () const { return m_cmalNode; }
+  void SetOrigin (Ipv4Address a) { m_origin = a; }
+  Ipv4Address GetOrigin () const { return m_origin; }
+
+  //\}
+
+  ///\name Flags
+  //\{
+  void SetGratiousRrep (bool f);
+  bool GetGratiousRrep () const;
+  void SetDestinationOnly (bool f);
+  bool GetDestinationOnly () const;
+  void SetUnknownSeqno (bool f);
+  bool GetUnknownSeqno () const;
+  //\}
+
+  bool operator== (MALHeader const & o) const;
+  private:
+
+    uint32_t       m_malID;          ///< MAL ID
+	Ipv4Address    m_dst;            ///< Destination IP Address
+	Ipv4Address    m_origin;         ///< Originator IP Address
+	Ipv4Address    m_pmalNode;        ///< Pure Malicious node IP Address
+	Ipv4Address    m_cmalNode;        ///< Collaborative Malicious node IP Address
+};
+
+std::ostream & operator<< (std::ostream & os, MALHeader const &);
 
 }  // namespace trust
 }  // namespace ns3

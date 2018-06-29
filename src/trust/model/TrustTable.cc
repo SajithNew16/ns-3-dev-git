@@ -20,12 +20,13 @@ void TrustTable::addTrustTableEntry(TrustTableEntry entry)
 
 void TrustTable::removeTrustTableEntry(TrustTableEntry entry)
 {
-//  not allowed to delete yet
-//	trustTableRecords.erase(trustTableRecords.begin()+2);
-//	trustTableRecords.erase(std::remove(trustTableRecords.begin(), trustTableRecords.end(), entry.getGlobalTrust()), trustTableRecords.end());
-//	std::cout <<"Removing " << entry.getDestinationNode() << std::endl;
-//	entry.
-//	trustTableRecords.pop_back(); //need to change this
+	trustTableRecords.pop_back(); //need to change this
+}
+
+void
+TrustTable::removeTrustTableEntryByIndex (TrustTableEntry entry, int index)
+{
+//  trustTableRecords.erase(trustTableRecords.begin()+index);
 }
 
 TrustTableEntry* TrustTable::getTrustTableEntryByNodeId(Ipv4Address nodeId)
@@ -65,14 +66,13 @@ void TrustTable::setTrustTable(std::vector<TrustTableEntry> newTrustTable)
 	this->trustTableRecords = newTrustTable;
 }
 
-void
-TrustTable::printTable()
+void TrustTable::printTable()
 {
-  std::cout << ">>>>>>>>>>>>>> Direct Trust Table <<<<<<<<<<<<<<<" << std::endl;
-  std::cout << "| "<< "Destination Node"<< columnSeperator << "Direct Trust" << columnSeperator << "Indirect Trust" << columnSeperator << "Interactions" << columnSeperator << "Global Trust"<< columnSeperator << "Trust Level" << columnSeperator << "RREQ" << columnSeperator << "RPLY" << columnSeperator << "Hello" << columnSeperator <<  "ERR" << columnSeperator << "NDR" << columnSeperator  << "NDF" << std::endl;
-  for (std::vector<TrustTableEntry>::iterator it = trustTableRecords.begin(); it != trustTableRecords.end(); it++)
-    {
-		std::cout << "| " << it->getDestinationNode() << "\t" << columnSeperator << it->getDirectTrust() << "\t" << columnSeperator << it->getIndirectTrust() << "\t" << columnSeperator << it->getInteractionCount() << "\t"<< columnSeperator << it->getGlobalTrust() << "\t" << columnSeperator << it->getTrustLevel() << "\t" << columnSeperator << it->getNoOfRREQ() << "\t" << columnSeperator << it->getNoOfRPLY() << "\t" << columnSeperator << it->getNoOfHELLO() << "\t" << columnSeperator << it->getNoOfERR() <<  "\t" << columnSeperator<<  it->getNoOfReceivedDataPackets() << "\t" << columnSeperator<< it->getNoOfSentDataPackets() << std::endl;
+	std::cout << ">>>>>>>>>>>>>> Direct Trust Table <<<<<<<<<<<<<<<" << std::endl;
+	std::cout << "| "<< "Destination Node"<< columnSeperator << "Direct Trust" << columnSeperator << "Indirect Trust" << columnSeperator << "Interactions" << columnSeperator << "Global Trust"<< columnSeperator << "Trust Level" << columnSeperator << "RREQ" << columnSeperator << "RPLY" << columnSeperator << "Hello" << columnSeperator <<  "ERR" << columnSeperator << "NDR" << columnSeperator  << "NDF" << columnSeperator << "Blacklist" << columnSeperator << std::endl;
+	for (std::vector<TrustTableEntry>::iterator it = trustTableRecords.begin(); it != trustTableRecords.end(); it++)
+	{
+		std::cout << "| " << it->getDestinationNode() << "\t" << columnSeperator << it->getDirectTrust() << "\t" << columnSeperator << it->getIndirectTrust() << "\t" << columnSeperator << it->getInteractionCount() << "\t"<< columnSeperator << it->getGlobalTrust() << "\t" << columnSeperator << it->getTrustLevel() << "\t" << columnSeperator << it->getNoOfRREQ() << "\t" << columnSeperator << it->getNoOfRPLY() << "\t" << columnSeperator << it->getNoOfHELLO() << "\t" << columnSeperator << it->getNoOfERR() <<  "\t" << columnSeperator<<  it->getNoOfReceivedDataPackets() << "\t" << columnSeperator<< it->getNoOfSentDataPackets() << columnSeperator << it->getBlacklist() << std::endl;
 	}
 }
 

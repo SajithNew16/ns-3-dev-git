@@ -4,6 +4,8 @@
 #include <list>
 #include "NodeEntry.h"
 #include "ns3/ipv4-address.h"
+#include "TrustTable.h"
+#include "TrustTableEntry.h"
 
 
 namespace ns3
@@ -16,22 +18,27 @@ class RecommendationTableEntry
 {
 
 private:
-
 	Ipv4Address neighborNodeId;
-	Ipv4Address recommendingNodesList;
+	Ipv4Address recommendingNode;
 	double maturityLevel;
 	bool blackList;
-	double recommendationValue;
+	double recommendationValue_GT;
+	double recommendationValue_DT;
 
 public:
 	Ipv4Address getneighborNodeId();
 	void setNeighborNodeId(Ipv4Address neighborNodeId);
 	Ipv4Address getRecommendingNodes();
-	void SetRecommendingNodes (Ipv4Address neighborNodeId);
-	double getrecValue();
-	void setRecValue(double recommendationValue);
-	int getMaturityLevel();
+	double getrecValue_DT();
+	double getrecValue_GT();
+	double getMaturityLevel();
+	bool getBlacklistStatus();
+	void setRecValue_DT(double recommendationValue_DT);
+	void setRecValue_GT(double recommendationValue_GT);
+	void setRecommendingNode(Ipv4Address recommendingNode);
 	void setMaturityLevel(double maturityLevel);
+	void calculateMaturityLevel(std::vector<TrustTableEntry> node_entry_list);
+	void blacklistNode(bool status);
 	RecommendationTableEntry();
 	~RecommendationTableEntry();
 };

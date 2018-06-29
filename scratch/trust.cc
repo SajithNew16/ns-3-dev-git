@@ -112,7 +112,7 @@ int main (int argc, char **argv)
 TrustExample::TrustExample () :
   size (3),
   step (20),
-  totalTime (10),
+  totalTime (100),
   pcap (true),
   printRoutes (true)
 {

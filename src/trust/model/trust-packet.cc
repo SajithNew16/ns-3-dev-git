@@ -88,6 +88,11 @@ TypeHeader::Deserialize (Buffer::Iterator start)
         m_type = (MessageType) type;
         break;
       }
+    case TRUSTTYPE_MAL:
+      {
+        m_type = (MessageType) type;
+        break;
+      }
     default:
       m_valid = false;
     }
@@ -122,10 +127,15 @@ TypeHeader::Print (std::ostream &os) const
         break;
       }
     case TRUSTTYPE_TRR:
-          {
-            os << "TRR";
-            break;
-          }
+      {
+        os << "TRR";
+        break;
+      }
+    case TRUSTTYPE_MAL:
+      {
+        os << "MAL";
+        break;
+      }
     default:
       os << "UNKNOWN_TYPE";
     }
@@ -693,9 +703,9 @@ operator<< (std::ostream & os, RerrHeader const & h )
 // TRR
 //-----------------------------------------------------------------------------
 TRRHeader::TRRHeader ( uint32_t GT, uint32_t DT, uint32_t trrID, Ipv4Address dst,
-                        uint32_t dstSeqNo, Ipv4Address origin, Ipv4Address target, uint32_t originSeqNo, uint32_t trrLifetime) :
+                        uint32_t dstSeqNo, Ipv4Address origin, uint32_t originSeqNo) :
   m_GT (GT), m_DT (DT), m_trrID (trrID), m_dst (dst),
-  m_dstSeqNo (dstSeqNo), m_origin (origin), m_target (target), m_originSeqNo (originSeqNo), m_trrLifetime (trrLifetime)
+  m_dstSeqNo (dstSeqNo), m_origin (origin),  m_originSeqNo (originSeqNo)
 {
 }
 
@@ -720,36 +730,34 @@ TRRHeader::GetInstanceTypeId () const
 uint32_t
 TRRHeader::GetSerializedSize () const
 {
-  return 36;
+  return 32;
 }
 
 void
 TRRHeader::Serialize (Buffer::Iterator i) const
 {
-  i.WriteU32 (m_GT);
+  i.WriteU32(m_GT);
   WriteTo (i, m_dst);
-  i.WriteU32 (m_DT);
+  i.WriteU32(m_DT);
   i.WriteU32 (m_trrID);
   i.WriteU32 (m_dstSeqNo);
   WriteTo (i, m_origin);
-  WriteTo (i, m_target);
   i.WriteU32 (m_originSeqNo);
-  i.WriteHtonU32 (m_trrLifetime);
+  i.WriteHtonU32(m_trrLifetime);
 }
 
 uint32_t
 TRRHeader::Deserialize (Buffer::Iterator start)
 {
   Buffer::Iterator i = start;
-  m_GT = i.ReadU32 ();
+  m_GT = i.ReadU32();
   std::cout<<"JUDE ADDED::: Deserialized m_GT = " <<m_GT<<std::endl;
   ReadFrom (i, m_dst);
-  m_DT = i.ReadU32 ();
+  m_DT = i.ReadU32();
   std::cout<<"JUDE ADDED::: Deserialized m_DT = " <<m_DT<<std::endl;
   m_trrID = i.ReadU32 ();
   m_dstSeqNo = i.ReadU32 ();
   ReadFrom (i, m_origin);
-  ReadFrom (i, m_target);
   m_originSeqNo = i.ReadU32 ();
   m_trrLifetime = i.ReadNtohU32 ();
   std::cout<<"JUDE ADDED::: Deserialized trrLifetime = " <<m_trrLifetime<<std::endl;
@@ -764,7 +772,7 @@ TRRHeader::Print (std::ostream &os) const
 {
   os << "m_GT " << m_GT << " m_DT " << m_DT << " destination: ipv4 " << m_dst
      << " sequence number " << m_dstSeqNo << " source: ipv4 "
-     << m_origin << " target: ipv4 " << m_target << " sequence number " << m_originSeqNo << " TRR Lifetime " << m_trrLifetime << "\n" ;
+     << m_origin << " sequence number " << m_originSeqNo << "\n" ;
 }
 
 std::ostream &
@@ -779,7 +787,93 @@ TRRHeader::operator== (TRRHeader const & o) const
 {
   return ( m_GT == o.m_GT && m_DT == o.m_DT &&
           m_dst == o.m_dst && m_dstSeqNo == o.m_dstSeqNo &&
-          m_origin == o.m_origin && m_target == o.m_target && m_originSeqNo == o.m_originSeqNo && m_trrLifetime == o.m_trrLifetime);
+          m_origin == o.m_origin && m_originSeqNo == o.m_originSeqNo);
 }
+
+//-----------------------------------------------------------------------------
+// MAL
+//-----------------------------------------------------------------------------
+MALHeader::MALHeader (  uint32_t malID, Ipv4Address dst,
+                         Ipv4Address origin, Ipv4Address pmalNode, Ipv4Address cmalNode) :
+		m_malID (malID), m_dst (dst),
+   m_origin (origin), m_pmalNode (pmalNode), m_cmalNode (cmalNode)
+{
+}
+
+NS_OBJECT_ENSURE_REGISTERED (MALHeader);
+
+TypeId
+MALHeader::GetTypeId ()
+{
+  static TypeId tid = TypeId ("ns3::trust::MALHeader")
+    .SetParent<Header> ()
+    .AddConstructor<MALHeader> ()
+  ;
+  return tid;
+}
+
+TypeId
+MALHeader::GetInstanceTypeId () const
+{
+  return GetTypeId ();
+}
+
+uint32_t
+MALHeader::GetSerializedSize () const
+{
+  return 20;
+}
+
+void
+MALHeader::Serialize (Buffer::Iterator i) const
+{
+  WriteTo (i, m_dst);
+  i.WriteU32 (m_malID);
+  WriteTo (i, m_pmalNode);
+  WriteTo (i, m_cmalNode);
+  WriteTo (i, m_origin);
+}
+
+uint32_t
+MALHeader::Deserialize (Buffer::Iterator start)
+{
+  Buffer::Iterator i = start;
+  ReadFrom (i, m_dst);
+  m_malID = i.ReadU32 ();
+  ReadFrom (i, m_pmalNode);
+  ReadFrom (i, m_cmalNode);
+  ReadFrom (i, m_origin);
+
+  uint32_t dist = i.GetDistanceFrom (start);
+  NS_ASSERT (dist == GetSerializedSize ());
+  return dist;
+}
+
+void
+MALHeader::Print (std::ostream &os) const
+{
+  os << " destination: ipv4 " << m_dst
+     << " pmalNode: ipv4 " << m_pmalNode
+     << " cmalNode: ipv4 " << m_cmalNode
+     << " source: ipv4 "
+     << m_origin << "\n";
+}
+
+std::ostream &
+operator<< (std::ostream & os, MALHeader const & h)
+{
+  h.Print (os);
+  return os;
+}
+
+bool
+MALHeader::operator== (MALHeader const & o) const
+{
+  return (
+          m_dst == o.m_dst && m_pmalNode == o.m_pmalNode
+          && m_cmalNode == o.m_cmalNode &&
+          m_origin == o.m_origin);
+}
+
 }
 }

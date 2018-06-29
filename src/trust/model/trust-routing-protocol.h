@@ -62,6 +62,7 @@ public:
    */
   static TypeId GetTypeId (void);
   static const uint32_t TRUST_PORT;
+
   /// constructor
   RoutingProtocol ();
   virtual ~RoutingProtocol ();
@@ -170,7 +171,15 @@ public:
   {
     return m_enableBroadcast;
   }
-
+  // Method declared for Blackhole Attack Simulation - Shalini Satre
+  void SetMaliciousEnable (bool f)
+  {
+    IsMalicious = f;
+  }
+  bool GetMaliciousEnable () const
+  {
+    return IsMalicious;
+  }
   /**
    * Assign a fixed random variable stream number to the random variables
    * used by this model.  Return the number of streams (possibly zero) that
@@ -261,6 +270,13 @@ private:
 //  RecommendationHandler* m_recHanlder;
 
   TRRTable m_TRRTable;
+  /*
+   * Set node as malicious. Dropping every packet received.
+   * Variable declared for Blackhole Attack Simulation - Shalini Satre
+   */
+  bool IsMalicious;
+
+
 
 private:
   /// Start protocol operation
@@ -272,7 +288,7 @@ private:
    * \param header the IP header
    * \param ucb the UnicastForwardCallback function
    * \param ecb the ErrorCallback function
-   */ 
+   */
   void DeferredRouteOutput (Ptr<const Packet> p, const Ipv4Header & header, UnicastForwardCallback ucb, ErrorCallback ecb);
   /**
    * If route exists and is valid, forward packet.
@@ -282,7 +298,7 @@ private:
    * \param ucb the UnicastForwardCallback function
    * \param ecb the ErrorCallback function
    * \returns true if forwarded
-   */ 
+   */
   bool Forwarding (Ptr<const Packet> p, const Ipv4Header & header, UnicastForwardCallback ucb, ErrorCallback ecb);
   /**
    * Repeated attempts by a source node at route discovery for a single destination
@@ -325,7 +341,7 @@ private:
   Ptr<Socket> FindSubnetBroadcastSocketWithInterfaceAddress (Ipv4InterfaceAddress iface) const;
   /**
    * Process hello message
-   * 
+   *
    * \param rrepHeader RREP message header
    * \param receiverIfaceAddr receiver interface IP address
    */
@@ -395,12 +411,42 @@ private:
   void sendTRR(Ipv4Address source, Ipv4Address node, Ipv4Address targetNode);
 
   void RecvTrr (Ipv4Address sender, Ptr<Packet> packet);
-
+  /**
+   * \brief send TRR (Trust Recommendation Request) after 3 seconds
+   */
   void execute();
-  /// Calculate Direct Trust at the beginning.
+  /**
+   * \brief calculate direct, indirect, global trust and
+   * classifies trust levels after the first second.
+   */
   void ExecuteFirst();
-  /// Print trust tables after all the transmissions happened.
+  /**
+   * \brief
+   * printing trust table after the 9th second.
+   */
   void ExecuteLast();
+  /**
+   * \brief scheduled at 5th second to take
+   * decision on malicious nodes
+   */
+  void ExecuteSpiralEnd ();
+  /**
+   * \brief scheduled at 4th second to broadcast
+   * malicious nodes information
+   */
+  void ExecuteBroadcastMal();
+  /**
+   * broadcast packet to neighbors
+   * \param source - source node IP address
+   * \param receiver - receiver node IP address
+   */
+  void SendMal (Ipv4Address source, Ipv4Address receiver);
+  /**
+   * receive MAL (Malicious nodes ids) packets
+   * \param sender - sender IP address
+   * \param packet - receive packet
+   */
+  void RecvMal (Ipv4Address sender, Ptr<Packet> packet);
 
   /// Hello timer
   Timer m_htimer;

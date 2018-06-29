@@ -1,8 +1,6 @@
 #pragma once
 #include "ns3/ipv4-address.h"
 
-
-
 namespace ns3
 {
 namespace trust

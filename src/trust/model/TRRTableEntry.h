@@ -18,7 +18,6 @@ class TRRTableEntry
 private:
 
 	Ipv4Address targetNodeId;
-	Ipv4Address destinationNodeId;
 	Ipv4Address senderNodeId;
 	double directTrust;
 	double globalTrust;
@@ -30,8 +29,6 @@ public:
 	void setTargetNodeId(Ipv4Address neighborNodeId);
 	Ipv4Address getSenderNodeId();
 	void setSenderNodeId(Ipv4Address neighborNodeId);
-	Ipv4Address GetDestinationNodeId ();
-	void SetDestinationNodeId (Ipv4Address neighborNodeId);
 	double getDirectTrust();
 	void setDirectTrust(double DT);
 	double getGlobalTrust();

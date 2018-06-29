@@ -16,19 +16,16 @@ private:
 	Time timeDuration;
 	std::string result;
 public:
-	BackupTableEntry();
-	void setNeiNode(Ipv4Address neiNode);
-	Ipv4Address getNeiNode();
-	void setTrustValue(double trustValue);
-	double getTrustValue();
-	void updateTrustValue(double trustValue);
+	BackupTableEntry ();
+	void SetNeiNode (Ipv4Address neiNode);
+	Ipv4Address GetNeiNode ();
+	void SetTrustValue (double trustValue);
+	double GetTrustValue ();
 	void SetResult (std::string result);
-	void updateResult(std::string result);
 	std::string GetResult ();
 	void SetTimeDuration (Time timeDuration);
 	Time GetTimeDuration ();
-	void updateTimeDuration(Time timeDuration);
-	~BackupTableEntry();
+	~BackupTableEntry ();
 };
 
 }

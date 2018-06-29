@@ -85,7 +85,6 @@ RecommendationTable * TestValueGenerator::getDummyRecommendationTableByTrustTabl
 }
 
 
-
 TestValueGenerator::~TestValueGenerator()
 {
 }

@@ -4,7 +4,6 @@
 #include "TrustTableEntry.h"
 #include "DirTrustCal.h"
 #include "Spiral.h"
-#include "TrustInfoReceiver.h"
 #include <vector>
 #include <iostream>
 
@@ -29,15 +28,18 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 
 	for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++) {
 		node_GT = it->getGlobalTrust();
+
 		if (node_GT > Threshold_trust)
 		{
 			if (node_GT > Threshold_trustWorthy)
 			{
 				it->setTrustLevel(1);
+				it->setBlacklist(false);
 			}
 			else
 			{
 				it->setTrustLevel(2);
+				it->setBlacklist(false);
 			}
 		}
 		else
@@ -45,53 +47,34 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 			if (node_GT > Threshold_selfish)
 			{
 				it->setTrustLevel(3);
-
-				//reduce trust here
+				it->setBlacklist(false);
+				calculateReductionFactor(*it);
+				it->calculateGlobalTrust ();
 			}
 			else
-			  {
-				//call spiral model method
-				Spiral spiralModel;
-				double *past_global_trust_range;
-				past_global_trust_range = spiralModel.GetMinMaxTrust (this->backupTable);
-				TrustInfoReceiver trustInfoReceiver;
-				if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
-				  {
-					it->setTrustLevel(4);
-					if (this->afterExecuteFirstFlag == 2)
-					  {
-					    trustTable->removeTrustTableEntry(*it);
-					    it->setTrustLevel(4);
-					    trustInfoReceiver.sendMaliciousBroadcast(it->getDestinationNode());
-					  }
-				  }
-				else
-				  {
-					it->setTrustLevel(5);
-					it->setBlacklist(true);
-					//neighbour_node_list = getRecommendedNodes(inputNode);
-					//reduce_factor = calculateReduceFactor(input_node);
-					//for (int i = 0; i<neighbour_node_array.length(); i++) {
-					//  recalculateIndirectTrust(neighbour_node, reduce_factor);
-					//	updateGlobalTrust(node);
-					//}
-
-					//Broadcast to the others that this is a collaborative malicious nodes
-					trustInfoReceiver.sendMaliciousBroadcast(it->getDestinationNode());
-
-					//broadcastToNeighbors(input_node,"Collaborative malicious node");
-					// GOTO Identifying_trust_levels
-				  }
-//				model.addMaliciousCategory(past_global_trust_range, trustTable);
-			  }
-		}
+            {
+              //----call spiral model here-----
+              Spiral spiralModel;
+              double *past_global_trust_range;
+              past_global_trust_range = spiralModel.GetMinMaxTrust (this->backupTable,
+                                                                    *it);
+              if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
+                {
+                  it->setTrustLevel (4);
+                  it->setBlacklist (false);
+                }
+              else
+                {
+                  it->setTrustLevel (5);
+                  it->setBlacklist (true);
+                  calculateReductionFactorForNeibors (trustTable,
+                                                      *it);
+                }
+            }
+		 }
 	}
 }
 
-void
-TrustLevelClassifier::SetBackupTable (BackupTable* backupTable) {
-	this->backupTable = backupTable;
-}
 
 double TrustLevelClassifier::calculateReductionFactor(int interactions, double globalTrust)
 {
@@ -109,11 +92,46 @@ double TrustLevelClassifier::recalculateIndirectTrust(double indirectTrust, doub
 	return indirectTrust;
 }
 
-void
-TrustLevelClassifier::SetAfterExecuteFirstFlag (uint afterExecuteFirstFlag)
+void TrustLevelClassifier::calculateReductionFactor(TrustTableEntry trustTableEntry)
 {
-	this->afterExecuteFirstFlag = afterExecuteFirstFlag;
+	double DT,GT,IT;
+	double reductionVal = 0;
+
+	DT = trustTableEntry.getDirectTrust();
+	GT = trustTableEntry.getGlobalTrust();
+	IT = trustTableEntry.getIndirectTrust();
+	reductionVal = DT/(GT*10);
+
+//	std::cout<<"IT val Before------>>>>"<< trustTableEntry.getIndirectTrust()<<std::endl;
+	trustTableEntry.setIndirectTrust(IT - reductionVal);
+//	std::cout<<"IT val After------>>>>"<< trustTableEntry.getIndirectTrust()<<std::endl;
+
 }
+
+void
+TrustLevelClassifier::calculateReductionFactorForNeibors(TrustTable* trustTable,TrustTableEntry trustTableEntry)
+{
+  double reductionVal = 0.0;
+  for (std::vector<TrustTableEntry>::iterator it = trustTable->getTrustTableEntries ().begin ();
+      it != trustTable->getTrustTableEntries ().end (); it++)
+    {
+      //select neighbor nodes
+      if (trustTableEntry.getDestinationNode () != it->getDestinationNode ())
+        {
+          //update global trust for neighbor nodes
+          reductionVal = it->getDirectTrust()/(it->getGlobalTrust()*10);
+          it->updateIndirectTrust(it->getIndirectTrust() - reductionVal);
+          it->calculateGlobalTrust();
+        }
+    }
+}
+
+void
+TrustLevelClassifier::SetBackupTable (BackupTable* backupTable)
+{
+	this->backupTable = backupTable;
+}
+
 
 TrustLevelClassifier::~TrustLevelClassifier()
 {

@@ -53,14 +53,13 @@ void TRRTable::setRecommendationTable(std::vector<TRRTableEntry> newRecommendati
 	this->trrTableRecords = newRecommendationTable;
 }
 
-void
-TRRTable::printTable()
+void TRRTable::printTable()
 {
-  std::cout << "| " << "Target Node" << columnSeperator << "Destination Node" << columnSeperator <<"Sender Nodes" << columnSeperator << "DT" << columnSeperator << "GT" << columnSeperator << "SentTime" << columnSeperator << "ReceivedTime" << std::endl;
+	std::cout << "| " << "Target Node" << columnSeperator << "Sender Nodes" << columnSeperator << "DT" << columnSeperator << "GT" << columnSeperator << "SentTime" << columnSeperator << "ReceivedTime" << std::endl;
 
-  for (std::vector<TRRTableEntry>::iterator it = trrTableRecords.begin(); it != trrTableRecords.end(); it++)
-    {
-	  std::cout << "| " << it->getTargetNodeId() << "\t\t" << columnSeperator << it->GetDestinationNodeId () << "\t\t" << columnSeperator <<it->getSenderNodeId() << "\t\t" << columnSeperator << it->getDirectTrust() << "\t\t" << columnSeperator << it->getGlobalTrust() << "\t\t" << columnSeperator << it->getSentTime() << columnSeperator << it->getReceivedTime() << "\t\t" << columnSeperator << std::endl;
+	for (std::vector<TRRTableEntry>::iterator it = trrTableRecords.begin(); it != trrTableRecords.end(); it++)
+	{
+	std::cout << "| " << it->getTargetNodeId() << "\t\t" << columnSeperator << it->getSenderNodeId() << "\t\t" << columnSeperator << it->getDirectTrust() << "\t\t" << columnSeperator << it->getGlobalTrust() << "\t\t" << columnSeperator << it->getSentTime() << columnSeperator << it->getReceivedTime() << "\t\t" << columnSeperator << std::endl;
 	}
 }
 

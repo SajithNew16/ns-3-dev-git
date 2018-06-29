@@ -18,7 +18,26 @@ Ipv4Address RecommendationTableEntry::getneighborNodeId()
 
 Ipv4Address RecommendationTableEntry::getRecommendingNodes()
 {
-	return this->recommendingNodesList;
+	return this->recommendingNode;
+}
+
+double RecommendationTableEntry::getMaturityLevel()
+{
+	return this->maturityLevel;
+}
+double RecommendationTableEntry::getrecValue_DT()
+{
+	return this->recommendationValue_DT;
+}
+
+double RecommendationTableEntry::getrecValue_GT()
+{
+	return this->recommendationValue_GT;
+}
+
+bool RecommendationTableEntry::getBlacklistStatus()
+{
+	return this->blackList;
 }
 
 void RecommendationTableEntry::setNeighborNodeId(Ipv4Address neighborNodeId)
@@ -26,31 +45,54 @@ void RecommendationTableEntry::setNeighborNodeId(Ipv4Address neighborNodeId)
 	this->neighborNodeId = neighborNodeId;
 }
 
-void
-RecommendationTableEntry::SetRecommendingNodes (Ipv4Address neighborNodeId)
-{
-	this->recommendingNodesList = neighborNodeId;
-}
-
 void RecommendationTableEntry::setMaturityLevel(double maturityLevel)
 {
 	this->maturityLevel = maturityLevel;
 }
 
-int RecommendationTableEntry::getMaturityLevel()
+void RecommendationTableEntry::setRecValue_DT(double recommendationValue_DT)
 {
-	return this->maturityLevel;
+	this->recommendationValue_DT = recommendationValue_DT;
 }
 
-void RecommendationTableEntry::setRecValue(double recommendationValue)
+
+void RecommendationTableEntry::setRecValue_GT(double recommendationValue_GT)
 {
-	this->recommendationValue = recommendationValue;
+	this->recommendationValue_GT = recommendationValue_GT;
 }
 
-double RecommendationTableEntry::getrecValue()
+void RecommendationTableEntry::setRecommendingNode(Ipv4Address recommendingNode)
 {
-	return this->recommendationValue;
+	this->recommendingNode = recommendingNode;
 }
+
+void RecommendationTableEntry::blacklistNode(bool status)
+{
+	this->blackList = status;
+}
+
+
+/**
+ * Method:    calculateMaturityLevel
+ * Returns:   maturity level
+ * Parameter: node
+ */
+void RecommendationTableEntry::calculateMaturityLevel(std::vector<TrustTableEntry> node_entry_list) {
+
+	int i_p_node = 0;
+	double i_all = 0;
+
+	for (std::vector<TrustTableEntry>::iterator it = node_entry_list.begin();it != node_entry_list.end(); it++) {
+		if(this->neighborNodeId == it->getDestinationNode()){
+			 i_p_node = it->getInteractionCount();
+		}
+
+		i_all = i_all + it->getInteractionCount();
+	}
+
+	this->maturityLevel = i_p_node / i_all;
+}
+
 
 RecommendationTableEntry::~RecommendationTableEntry()
 {
