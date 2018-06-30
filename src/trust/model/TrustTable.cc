@@ -26,7 +26,7 @@ void TrustTable::removeTrustTableEntry(TrustTableEntry entry)
 void
 TrustTable::removeTrustTableEntryByIndex (TrustTableEntry entry, int index)
 {
-//  trustTableRecords.erase(trustTableRecords.begin()+index);
+  trustTableRecords.erase(trustTableRecords.begin()+index);
 }
 
 TrustTableEntry* TrustTable::getTrustTableEntryByNodeId(Ipv4Address nodeId)

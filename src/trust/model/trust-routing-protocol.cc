@@ -2782,7 +2782,9 @@ RoutingProtocol::DoInitialize (void)
 void
 RoutingProtocol::ExecuteLast()
 {
-	std::cout << "-------After 9 seconds-------" << std::endl;
+	std::cout << "-------After 90 seconds-------" << std::endl;
+	//recalculate trust and trustLevels
+	ExecuteFirst ();
 	m_trustTable.printTable();
 	m_recommendationTable.printTable();
 }
