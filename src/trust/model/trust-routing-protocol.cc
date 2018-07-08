@@ -1321,37 +1321,68 @@ RoutingProtocol::UpdateRouteToNeighbor (Ipv4Address sender, Ipv4Address receiver
                                               /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0),
                                               /*hops=*/ 1, /*next hop=*/ sender, /*lifetime=*/ m_activeRouteTimeout);
       m_routingTable.AddRoute (newEntry);
+
+      TrustTableEntry trustTableEntry;
+      trustTableEntry.setDestinationNode (sender);
+      int alreadyAvailableDestinationRows = 0;
+
+      for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
+          it != m_trustTable.getTrustTableEntries ().end (); it++)
+        {
+          if (it->getDestinationNode () == sender)
+            {
+              alreadyAvailableDestinationRows++;
+            }
+        }
+
+      if (alreadyAvailableDestinationRows == 0)
+        {
+          m_trustTable.addTrustTableEntry (trustTableEntry);
+        }
     }
   else
     {
       Ptr<NetDevice> dev = m_ipv4->GetNetDevice (m_ipv4->GetInterfaceForAddress (receiver));
       if (toNeighbor.GetValidSeqNo () && (toNeighbor.GetHop () == 1) && (toNeighbor.GetOutputDevice () == dev))
         {
-          toNeighbor.SetLifeTime (std::max (m_activeRouteTimeout, toNeighbor.GetLifeTime ()));
+          toNeighbor.SetLifeTime (std::max (m_activeRouteTimeout,
+                                            toNeighbor.GetLifeTime ()));
         }
       else
         {
-          RoutingTableEntry newEntry (/*device=*/ dev, /*dst=*/ sender, /*know seqno=*/ false, /*seqno=*/ 0,
-                                                  /*iface=*/ m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver), 0),
-                                                  /*hops=*/ 1, /*next hop=*/ sender, /*lifetime=*/ std::max (m_activeRouteTimeout, toNeighbor.GetLifeTime ()));
+          RoutingTableEntry newEntry (/*device=*/dev, /*dst=*/
+                                      sender, /*know seqno=*/
+                                      false, /*seqno=*/
+                                      0,
+                                      /*iface=*/m_ipv4->GetAddress (m_ipv4->GetInterfaceForAddress (receiver),
+                                                                    0),
+                                      /*hops=*/1, /*next hop=*/
+                                      sender, /*lifetime=*/
+                                      std::max (m_activeRouteTimeout,
+                                                toNeighbor.GetLifeTime ()));
           m_routingTable.Update (newEntry);
+
+          TrustTableEntry trustTableEntry;
+          trustTableEntry.setDestinationNode (sender);
+          int alreadyAvailableDestinationRows = 0;
+
+          for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
+              it != m_trustTable.getTrustTableEntries ().end (); it++)
+            {
+              if (it->getDestinationNode () == sender)
+                {
+                  alreadyAvailableDestinationRows++;
+                }
+            }
+
+          if (alreadyAvailableDestinationRows == 0 && (toNeighbor.GetHop () == 1))
+            {
+              m_trustTable.addTrustTableEntry (trustTableEntry);
+            }
         }
     }
 
-  TrustTableEntry trustTableEntry;
-  trustTableEntry.setDestinationNode(sender);
-  int count = 0;
 
-  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries().begin(); it != m_trustTable.getTrustTableEntries().end(); it++)
-  {
-	  if(it->getDestinationNode() == sender)
-	  {count++;}
-  }
-
-  if(count == 0)
-  {
-	 m_trustTable.addTrustTableEntry(trustTableEntry);
-  }
 /*
   //populate recommendation table
   RecommendationTableEntry recommendationTableEntry;
@@ -2340,13 +2371,11 @@ RoutingProtocol::FindSubnetBroadcastSocketWithInterfaceAddress (Ipv4InterfaceAdd
 void
 RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address targetNode)
 {
-	std::cout<<"SENDING TRR  TO " << receiver<< std::endl;
 	  // Create TRR header
 	  TRRHeader trrHeader;
 	  trrHeader.SetDst (receiver);
 	  trrHeader.SetOrigin (source);
 	  trrHeader.SetTarget(targetNode);
-	  std::cout<<"JUDE ADDED::: TrrLifeTime = " << Simulator::Now() <<std::endl;
 	  uint32_t trrLifeTime = uint32_t (Simulator::Now().GetMilliSeconds());
 	  trrHeader.SetTrrLifetime(trrLifeTime);
 	  trrHeader.SetDstSeqno(150);
@@ -2362,8 +2391,6 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 
             Ptr<Packet> packet = Create<Packet> ();
 			      packet->AddHeader (trrHeader);
-			      /*TypeHeader tHeader (TRUSTTYPE_TRR);
-			      packet->AddHeader (tHeader);*/
 
 			      //newly added
 			      TypeHeader tHeader (TRUSTTYPE_TRR);
@@ -2373,35 +2400,8 @@ RoutingProtocol::sendTRR(Ipv4Address source, Ipv4Address receiver, Ipv4Address t
 			// Send to all-hosts broadcast if on /32 addr, subnet-directed otherwise
 			Ipv4Address destination;
 			destination = Ipv4Address ("255.255.255.255");
-            /*if (iface.GetMask () == Ipv4Mask::GetOnes ())
-              {
-                destination = Ipv4Address ("255.255.255.255");
-              }
-            else
-              {
-                destination = iface.GetBroadcast ();
-              }*/
-//			std::cout<<"sending TRR"<<std::endl;
-//			trrHeader.Print(std::cout);
             Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packet, destination);
           }
-
-      //print the routing table
-/*
-      AodvTrustHelper aodv;
-      Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("aodv-routing_12.txt", std::ios::out);
-      aodv.PrintRoutingTableAllAt (Seconds (7), routingStream);
-*/
-
-
-     /* RoutingTableEntry searchingRoutingEntry;
-      if(m_routingTable.LookupValidRoute(receiver, searchingRoutingEntry)){
-    	  std::cout<<"INTERFACE ADDRESS src ====  " <<searchingRoutingEntry.GetRoute()->GetSource()<<std::endl;
-    	  std::cout<<"INTERFACE ADDRESS dst ====  " <<searchingRoutingEntry.GetRoute()->GetDestination()<<std::endl;
-    	  Ptr<Socket> socket = FindSocketWithInterfaceAddress(searchingRoutingEntry.GetInterface());
-    	  std::cout<<"JUDE ADDED SOCKET :: " << socket<< std::endl;
-    	  Simulator::Schedule (Time (500), &RoutingProtocol::SendTo, this, socket, packet, receiver);
-      }*/
 }
 
 
@@ -2423,7 +2423,6 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 
   if (IsMyOwnAddress (trrHeader.GetOrigin()))
   {
-	  std::cout << "TRR BACK TO HOME!!! "<< std::endl;
 //	  rec = sendTRR(node, targetNode);
 	  Time time (MilliSeconds (trrHeader.GetTrrLifetime()));
 	  Time currentTime = Simulator::Now();
@@ -2438,7 +2437,6 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  entry.setDirectTrust((int)(trrHeader.GetDT()) / 100000.0);
 		  entry.setGlobalTrust((int)(trrHeader.GetGT()) / 100000.0);
 		  entry.setTargetNodeId(trrHeader.GetTarget());
-		  std::cout << "adding the TRR table entry "<< std::endl;
 		  m_TRRTable.addTrrTableEntry(entry);
 	  //  m_TRRTable.printTable();
 
@@ -2508,16 +2506,22 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
    packetReply->AddHeader (tHeader);
 
 
-   if(status)
-   {
-	   RoutingTableEntry searchingRoutingEntry;
-	   if(m_routingTable.LookupValidRoute(trrHeader.GetOrigin(), searchingRoutingEntry)){
-		   Ptr<Socket> socket = FindSocketWithInterfaceAddress(searchingRoutingEntry.GetInterface ());
-		   std::cout<<"Sending the response(below is the packet)"<<std::endl;
-		   trrHeader.Print(std::cout); //Printing the TRR header packet into Terminal
-	   	   Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0, 10))), &RoutingProtocol::SendTo, this, socket, packetReply, sender);
-	   }
-   }
+   if (status)
+    {
+      RoutingTableEntry searchingRoutingEntry;
+      if (m_routingTable.LookupValidRoute (trrHeader.GetOrigin (),
+                                           searchingRoutingEntry))
+        {
+          Ptr<Socket> socket = FindSocketWithInterfaceAddress (searchingRoutingEntry.GetInterface ());
+          Simulator::Schedule (Time (MilliSeconds (m_uniformRandomVariable->GetInteger (0,
+                                                                                        10))),
+                               &RoutingProtocol::SendTo,
+                               this,
+                               socket,
+                               packetReply,
+                               sender);
+        }
+    }
  }
 
 void RoutingProtocol::execute() {
@@ -2559,7 +2563,7 @@ RoutingProtocol::ExecuteFirst ()
 
   for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin(); it != node_entry_vector.end(); it++)
     {
-      double ind_trust_value = indTrustCal.calculateIndirectTrust (*it);
+      double ind_trust_value = indTrustCal.calculateIndirectTrust (*it);;
       it->updateIndirectTrust (ind_trust_value);
       it->calculateGlobalTrust ();
     }
@@ -2588,7 +2592,8 @@ RoutingProtocol::ExecuteFirst ()
   TrustLevelClassifier trustLevelClassifier;
   trustLevelClassifier.SetBackupTable (&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
-  m_backupTable.printTable();
+//  m_backupTable.printTable();
+//  m_trustTable.printTable();
 }
 
 /**
@@ -2603,12 +2608,10 @@ RoutingProtocol::ExecuteFirst ()
 void
 RoutingProtocol::SendMal (Ipv4Address source, Ipv4Address receiver)
 {
-  std::cout << "SENDING MAL TO " << receiver << " from " << source << std::endl;
   // Create MAL header
   MALHeader malHeader;
   malHeader.SetDst (receiver);
   malHeader.SetOrigin (source);
-  std::cout<<"MALLifeTime = " << Simulator::Now() <<std::endl;
 
   Ipv4InterfaceAddress iface;
 
@@ -2780,12 +2783,59 @@ RoutingProtocol::DoInitialize (void)
 }
 
 void
+RoutingProtocol::ReCalculateTrust()
+{
+  DirTrustCal dirCalculator;
+  dirCalculator.calculateDirectTrust (&m_trustTable);
+
+  //indirect trust calculation
+  IndTrustCal indTrustCal;
+  indTrustCal.setTrustTable (&m_trustTable);
+  indTrustCal.setRecommendationTable (&m_recommendationTable);
+  std::vector<TrustTableEntry>& node_entry_vector = m_trustTable.getTrustTableEntries ();
+
+  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin (); it != node_entry_vector.end (); it++)
+    {
+      double ind_trust_value = indTrustCal.calculateIndirectTrust (*it);
+      it->updateIndirectTrust (ind_trust_value);
+      it->calculateGlobalTrust ();
+    }
+
+  std::vector<BackupTableEntry> backup_entry_vector (node_entry_vector.size () * 2);
+  int index = node_entry_vector.size ();
+  for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin (); it != node_entry_vector.end (); it++)
+    {
+      backup_entry_vector.at (index).SetNeiNode (it->getDestinationNode ());
+      backup_entry_vector.at (index).SetTrustValue (it->getGlobalTrust ());
+      backup_entry_vector.at (index).SetTimeDuration (Simulator::Now () - Time (1));
+      if (it->getGlobalTrust () <= 0.3)
+        {
+          backup_entry_vector.at (index).SetResult ("Pure or Collaborative malicious");
+        }
+      else
+        {
+          backup_entry_vector.at (index).SetResult ("Trustworthy, Partially Trustworthy or Selfish Nodes");
+        }
+      //add entries to m_backupTable
+      m_backupTable.addBackupTableEntry (backup_entry_vector.at (index));
+      index++;
+    }
+
+  //Trust levels classification
+  TrustLevelClassifier trustLevelClassifier;
+  trustLevelClassifier.SetBackupTable (&m_backupTable);
+  trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+}
+
+void
 RoutingProtocol::ExecuteLast()
 {
 	std::cout << "-------After 90 seconds-------" << std::endl;
 	//recalculate trust and trustLevels
-	ExecuteFirst ();
+//	ExecuteFirst ();
+	ReCalculateTrust ();
 	m_trustTable.printTable();
+	m_backupTable.printTable();
 	m_recommendationTable.printTable();
 }
 

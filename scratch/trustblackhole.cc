@@ -15,6 +15,7 @@
  * 
  */
 #include "ns3/trust-module.h"
+#include "ns3/aodv-module.h"
 #include "ns3/netanim-module.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
@@ -60,9 +61,9 @@ int main (int argc, char *argv[])
   c.Create(4);
 
   not_malicious.Add(c.Get(1));
-  not_malicious.Add(c.Get(2));
+  not_malicious.Add(c.Get(0));
   not_malicious.Add(c.Get(3));
-  malicious.Add(c.Get(0));
+  malicious.Add(c.Get(2));
   // Set up WiFi
   WifiHelper wifi;
 
@@ -105,7 +106,7 @@ int main (int argc, char *argv[])
 //  Enable trust
   TrustHelper trust;
   TrustHelper malicious_trust;
- 
+
 
   // Set up internet stack
   InternetStackHelper internet;
@@ -158,13 +159,14 @@ int main (int argc, char *argv[])
 
   AnimationInterface anim ("blackhole.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 500);
+//  AnimationInterface::UpdateNodeSize ("10.0.0.1", 5.0, 5.0);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 500);
   AnimationInterface::SetConstantPosition (c.Get (2), 400, 500);
   AnimationInterface::SetConstantPosition (c.Get (3), 600, 500); 
   anim.EnablePacketMetadata(true);
 
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole.routes", std::ios::out);
-      trust.PrintRoutingTableAllAt (Seconds (4.5), routingStream);
+      trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
   Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback (&ReceivePacket));

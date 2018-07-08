@@ -25,8 +25,8 @@ double* IndTrustCal::sendTRR (TrustTableEntry node,
 {
 
   double static rec[2];
-  rec[0] = 0.8;
-  rec[1] = 0.9;
+  rec[0] = 1.0;
+  rec[1] = 1.0;
 
   std::vector<RecommendationTableEntry> node_entry_list = this->recommendationTable->getRecommendationTableEntries ();
 

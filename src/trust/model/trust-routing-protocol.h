@@ -411,8 +411,9 @@ private:
   void sendTRR(Ipv4Address source, Ipv4Address node, Ipv4Address targetNode);
 
   void RecvTrr (Ipv4Address sender, Ptr<Packet> packet);
+  void ReCalculateTrust ();
   /**
-   * \brief send TRR (Trust Recommendation Request) after 3 seconds
+   * \brief send TRR (Trust Recommendation Request) after 30 seconds
    */
   void execute();
   /**
@@ -422,16 +423,16 @@ private:
   void ExecuteFirst();
   /**
    * \brief
-   * printing trust table after the 9th second.
+   * printing trust table after the 90th second.
    */
   void ExecuteLast();
   /**
-   * \brief scheduled at 5th second to take
+   * \brief scheduled at 50th second to take
    * decision on malicious nodes
    */
   void ExecuteSpiralEnd ();
   /**
-   * \brief scheduled at 4th second to broadcast
+   * \brief scheduled at 40th second to broadcast
    * malicious nodes information
    */
   void ExecuteBroadcastMal();

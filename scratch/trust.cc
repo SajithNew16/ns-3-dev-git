@@ -172,15 +172,25 @@ TrustExample::CreateNodes ()
     }
   // Create static grid
   MobilityHelper mobility;
-  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+ mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (0.0),
                                  "MinY", DoubleValue (0.0),
                                  "DeltaX", DoubleValue (step),
                                  "DeltaY", DoubleValue (0),
                                  "GridWidth", UintegerValue (size),
                                  "LayoutType", StringValue ("RowFirst"));
-  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel");
   mobility.Install (nodes);
+  /*ObjectFactory pos;
+  pos.SetTypeId ("ns3::RandomRectanglePositionAllocator");
+  pos.Set ("X", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=300.0]")); 
+  pos.Set ("Y", StringValue ("ns3::UniformRandomVariable[Min=0.0|Max=1500.0]"));
+  Ptr<PositionAllocator> taPositionAlloc = pos.Create ()->GetObject<PositionAllocator> ();
+  mobility.SetMobilityModel ("ns3::RandomWaypointMobilityModel",
+                             "PositionAllocator", PointerValue (taPositionAlloc));
+  mobility.SetPositionAllocator (taPositionAlloc);
+
+  mobility.Install (nodes);*/
 }
 
 void
