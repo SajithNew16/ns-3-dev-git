@@ -2834,6 +2834,7 @@ RoutingProtocol::ExecuteLast()
 	//recalculate trust and trustLevels
 //	ExecuteFirst ();
 	ReCalculateTrust ();
+	ExecuteSpiralEnd ();
 	m_trustTable.printTable();
 	m_backupTable.printTable();
 	m_recommendationTable.printTable();
