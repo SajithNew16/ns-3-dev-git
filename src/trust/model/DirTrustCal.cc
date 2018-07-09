@@ -21,12 +21,13 @@ void DirTrustCal::calculateDirectTrust(TrustTable *trustTable)
 		int rreq = it->getNoOfRREQ();
 		int rply =  it->getNoOfRPLY();
 		int hello =  it->getNoOfHELLO();
-//		int err =  it->getNoOfERR();
+		int err =  it->getNoOfERR();
 		int sent =  it->getNoOfSentDataPackets();
 		int received =  it->getNoOfReceivedDataPackets();
 		int interactions = it->getInteractionCount();
 
-		double cp = (rreq + rply + hello ) / 3.0;
+		double cp = (rreq + rply + hello + err ) / 3.0;
+	//	double cp = (rreq + rply + hello ) / 3.0;
 		double dp = 0;
 
 		if (received == 0) {
@@ -36,7 +37,9 @@ void DirTrustCal::calculateDirectTrust(TrustTable *trustTable)
 			dp = sent / (double) received;
 		}
 
-		double dt = (cp + dp)*2/(double)( interactions);
+		double dt = (cp + dp)*2/(double)(interactions);
+	//	double dt = (cp + dp)/2.0;
+
 		double value = round( dt * 100000.0 ) / 100000.0;
 
 	//	double finaldt = calculateFinalDT(dt);
@@ -53,10 +56,10 @@ double DirTrustCal::calculateFinalDT(double directTrustValue)
 
 	double scaledDT = 1 - (1 / pow(directTrustValue , 0.5));
 
-	double value = round( scaledDT * 100000.0 ) / 100000.0;
+	//double value = round( scaledDT * 100000.0 ) / 100000.0;
 
 
-	return value;
+	return scaledDT;
 
 }
 
