@@ -2461,7 +2461,16 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 		  }
 		  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
 		  std::cout << "    "<< std::endl;
-		  std::cout << "##############Printing Recommendation table#############"<< std::endl;
+		  //get the node of the owner of recommendation table
+		  Ipv4InterfaceAddress iface;
+		  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
+		        j != m_socketAddresses.end (); ++j)
+		      {
+		        Ptr<Socket> socket = j->first;
+		        iface = j->second;
+		      }
+
+		  std::cout << "##############Printing Recommendation table of "<< iface.GetLocal () <<" #############"<<std::endl;
 		  m_recommendationTable.printTable();
 	  }
 
@@ -2549,7 +2558,7 @@ void RoutingProtocol::execute() {
 			sendTRR(iface.GetLocal () , it2->getDestinationNode(), selectedTarget);
 		}
 	}
-  std::cout << "\n  ================== Printing trust table of  "<<iface.GetLocal ()<< " ==================" << std::endl;
+  std::cout << "\n  ================== Printing trust table of  "<<iface.GetLocal ()<< " at 30th second ==================" << std::endl;
 	m_trustTable.printTable();
 }
 
@@ -2597,7 +2606,7 @@ RoutingProtocol::ExecuteFirst ()
   trustLevelClassifier.SetBackupTable (&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 //  m_backupTable.printTable();
-  m_trustTable.printTable();
+//  m_trustTable.printTable();
 }
 
 /**
@@ -2720,7 +2729,7 @@ RoutingProtocol::ExecuteBroadcastMal ()
 		  }
 	  }
 
-	std::cout << "mal packet trust table of " << iface.GetLocal ()<< std::endl;
+	std::cout << "Trust table of " << iface.GetLocal ()<< " at 40th seconds" << std::endl;
 	m_trustTable.printTable();
 }
 
