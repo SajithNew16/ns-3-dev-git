@@ -68,7 +68,7 @@ void TrustTable::setTrustTable(std::vector<TrustTableEntry> newTrustTable)
 
 void TrustTable::printTable()
 {
-	std::cout << ">>>>>>>>>>>>>> Trust Table <<<<<<<<<<<<<<<" << std::endl;
+	std::cout << ">>>>>>>>>>>"<< "" <<" Trust Table <<<<<<<<<<<<" << std::endl;
 	std::cout << "| "<< "Destination Node"<< columnSeperator << "Direct Trust" << columnSeperator << "Indirect Trust" << columnSeperator << "Global Trust" << columnSeperator << "Trust Level"<< columnSeperator << "Interactions" << columnSeperator << "RREQ" << columnSeperator << "RPLY" << columnSeperator << "Hello" << columnSeperator <<  "ERR" << columnSeperator << "NDR" << columnSeperator  << "NDF" << columnSeperator << "Blacklist" << columnSeperator << std::endl;
 	for (std::vector<TrustTableEntry>::iterator it = trustTableRecords.begin(); it != trustTableRecords.end(); it++)
 	{
