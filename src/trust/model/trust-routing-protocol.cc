@@ -2720,52 +2720,7 @@ RoutingProtocol::ExecuteBroadcastMal ()
 }
 
 void RoutingProtocol::ExecuteSpiralEnd ()
-{/*
-  int index = 0;
-  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
-      it != m_trustTable.getTrustTableEntries ().end (); it++)
-    {
-      if (it->getTrustLevel () == 4)
-        {
-          m_trustTable.removeTrustTableEntryByIndex (*it, index);
-          std::cout << "node removed!!!!!!!!!!!!!!!!! : "<<it->getDestinationNode() << std::endl;
-          break;
-        }
-      if (it->getTrustLevel () == 5)
-        {
-          //after transmission phase in our algorithm begins
-          //check received collaborative malicious nodes are already blacklisted
-          if (it->getBlacklist ())
-            {
-              m_trustTable.removeTrustTableEntryByIndex (*it,
-                                                         index);
-              std::cout << "node removed!!!!!!!!!!!!!!!!! : "<<it->getDestinationNode() << std::endl;
-              break;
-              //broadcast to isolate
-            }
-          else
-            {
-              for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries ().begin ();
-                  it2 != m_trustTable.getTrustTableEntries ().end (); it2++)
-                {
-                  //blacklist collaborative malicious nodes if they are neighbors
-                  if (it2->getDestinationNode () == it->getDestinationNode ())
-                    {
-                      it->setBlacklist(true);
-                      //penalty process for neighbors of cm (did in spiral as well!)
-                      //broadcast to isolate
-                    }
-                  else
-                    {
-                      //broadcast to isolate
-                    }
-                }
-            }
-        }
-      index++;
-    }
-
-*/
+{
 	int index = 0;
 	 std::vector<RecommendationTableEntry> node_entry_list = m_recommendationTable.getRecommendationTableEntries();
 	 for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
@@ -2812,8 +2767,7 @@ void RoutingProtocol::ExecuteSpiralEnd ()
 			 }
 		 }
 	      index++;
-	    }
-
+	}
 }
 
 
