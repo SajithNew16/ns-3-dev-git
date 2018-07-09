@@ -2544,8 +2544,7 @@ void RoutingProtocol::execute() {
 			sendTRR(iface.GetLocal () , it2->getDestinationNode(), selectedTarget);
 		}
 	}
-	std::cout << "\n  ================== Printing trust table ==================" << std::endl;
-//	m_recommendationTable.printTable();
+  std::cout << "\n  ================== Printing trust table of  "<<iface.GetLocal ()<< " ==================" << std::endl;
 	m_trustTable.printTable();
 }
 
@@ -2716,7 +2715,7 @@ RoutingProtocol::ExecuteBroadcastMal ()
 		  }
 	  }
 
-	std::cout << "mal packet trust table" << std::endl;
+	std::cout << "mal packet trust table of " << iface.GetLocal ()<< std::endl;
 	m_trustTable.printTable();
 }
 
@@ -2887,6 +2886,15 @@ RoutingProtocol::ExecuteLast()
 //	ExecuteFirst ();
 	ReCalculateTrust ();
 	ExecuteSpiralEnd ();
+	Ipv4InterfaceAddress iface;
+
+  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
+      j != m_socketAddresses.end (); ++j)
+    {
+      Ptr<Socket> socket = j->first;
+      iface = j->second;
+    }
+  std::cout << "\n  ================== Printing tables of  "<<iface.GetLocal () << " ==================" <<std::endl;
 	m_trustTable.printTable();
 	m_backupTable.printTable();
 	m_recommendationTable.printTable();
