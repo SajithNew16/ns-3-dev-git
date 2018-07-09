@@ -2592,7 +2592,7 @@ RoutingProtocol::ExecuteFirst ()
   trustLevelClassifier.SetBackupTable (&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 //  m_backupTable.printTable();
-//  m_trustTable.printTable();
+  m_trustTable.printTable();
 }
 
 /**

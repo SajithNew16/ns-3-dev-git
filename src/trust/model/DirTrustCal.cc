@@ -26,25 +26,20 @@ void DirTrustCal::calculateDirectTrust(TrustTable *trustTable)
 		int received =  it->getNoOfReceivedDataPackets();
 		int interactions = it->getInteractionCount();
 
-
 		double cp = (rreq + rply + hello ) / 3.0;
-
-
+		double dp = 0;
 
 		if (received == 0) {
-			received = 1;
+			dp = 0;
 		}
-
-
-		double dp = sent / (double) received;
-
+		else{
+			dp = sent / (double) received;
+		}
 
 		double dt = (cp + dp)*2/(double)( interactions);
 		double value = round( dt * 100000.0 ) / 100000.0;
 
-
 	//	double finaldt = calculateFinalDT(dt);
-
 
 		it->setDirectTrust(value);
 	}
