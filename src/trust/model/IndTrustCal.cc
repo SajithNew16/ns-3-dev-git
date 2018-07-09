@@ -129,6 +129,8 @@ double IndTrustCal::calculateIndirectTrust (TrustTableEntry targetNode)
 
   std::vector<TrustTableEntry> node_entry_list = this->trustTable->getTrustTableEntries ();
   double w_sum = 0;
+  double value =0;
+
 
   for (std::vector<TrustTableEntry>::iterator it = node_entry_list.begin (); it != node_entry_list.end (); it++)
     {
@@ -141,12 +143,20 @@ double IndTrustCal::calculateIndirectTrust (TrustTableEntry targetNode)
           double *rec;
           rec = getDTGT (*it,
                          targetNode);
+          value = rec[0];
           double cal_w_term = w * (r_new_nei_node * rec[1]);
 
           w_sum = w_sum + cal_w_term;
         }
+      if(node_entry_list.size() == 1){
+    	  value = it->getDirectTrust();
+      }
     }
-  double value = round (w_sum * 100000.0) / 100000.0;
+
+  if (node_entry_list.size() > 1){
+	   value = round (w_sum * 100000.0) / 100000.0;
+  }
+
   return value;
 }
 

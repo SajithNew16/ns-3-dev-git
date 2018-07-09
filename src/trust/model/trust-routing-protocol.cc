@@ -2765,6 +2765,7 @@ void RoutingProtocol::ExecuteSpiralEnd ()
         }
       index++;
     }
+
 */
 	int index = 0;
 	 std::vector<RecommendationTableEntry> node_entry_list = m_recommendationTable.getRecommendationTableEntries();
