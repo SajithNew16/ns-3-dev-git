@@ -21,7 +21,8 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 {
 	double Threshold_trust = 0.5;
 	double Threshold_trustWorthy = 0.8;
-	double Threshold_selfish = 0.3;
+  //double Threshold_selfish =  0.3;
+	double Threshold_selfish =  0.30862;
 
 	std::vector<TrustTableEntry>& node_entry_vector = trustTable->getTrustTableEntries();
 	double node_GT;
@@ -31,6 +32,7 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 
 		if (node_GT > Threshold_trust)
 		{
+
 			if (node_GT > Threshold_trustWorthy)
 			{
 				it->setTrustLevel(1);
@@ -44,7 +46,7 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
 		}
 		else
 		{
-			if (node_GT > Threshold_selfish)
+			if (node_GT >  Threshold_selfish)
 			{
 				it->setTrustLevel(3);
 				it->setBlacklist(false);

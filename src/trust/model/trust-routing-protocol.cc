@@ -656,9 +656,9 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
      	  {
      	  it->incNDR();
      	  	  if(origin == "10.0.0.3"){
-     	  		it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();
-     	  		it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();
-     	  		it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();it->incNDR();
+     	  	      for(int i=0; i<=25; i++){
+     	  	         it->incNDR();
+     	  	      }
      	  	  }
      	  }
        }
