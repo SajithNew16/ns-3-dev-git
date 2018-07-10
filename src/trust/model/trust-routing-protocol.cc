@@ -2736,52 +2736,46 @@ RoutingProtocol::ExecuteBroadcastMal ()
 void RoutingProtocol::ExecuteSpiralEnd ()
 {
 	int index = 0;
-	 std::vector<RecommendationTableEntry> node_entry_list = m_recommendationTable.getRecommendationTableEntries();
-	 for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
+	  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
 	      it != m_trustTable.getTrustTableEntries ().end (); it++)
-	 {
-		 for (std::vector<RecommendationTableEntry>::iterator recNode = node_entry_list.begin();recNode != node_entry_list.end(); recNode++) {
-			 if(it->getDestinationNode() == recNode->getneighborNodeId() && recNode->getBlacklistStatus() == true){
-				 if (it->getTrustLevel () == 4)
-				 {
-					m_trustTable.removeTrustTableEntryByIndex(*it, index);
-					std::cout << "node removed!!!!!!!!!!!!!!!!! : "<< it->getDestinationNode() << std::endl;
-					break;
-				 }
-				 else if (it->getTrustLevel () == 5)
-			        {
-			          //after transmission phase in our algorithm begins
-			          //check received collaborative malicious nodes are already blacklisted
-			          if (it->getBlacklist ())
-			            {
-			        	  m_trustTable.removeTrustTableEntryByIndex(*it, index);
-			        	  std::cout << "node removed!!!!!!!!!!!!!!!!! : "<< it->getDestinationNode() << std::endl;
-			              break;
-			              //broadcast to isolate
-			            }
-			          else
-			            {
-			              for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries ().begin ();
-			                  it2 != m_trustTable.getTrustTableEntries ().end (); it2++)
-			                {
-			                  //blacklist collaborative malicious nodes if they are neighbors
-			                  if (it2->getDestinationNode () == it->getDestinationNode ())
-			                    {
-			                      it->setBlacklist(true);
-			                      //penalty process for neighbors of cm (did in spiral as well!)
-			                      //broadcast to isolate
-			                    }
-			                  else
-			                    {
-			                      //broadcast to isolate
-			                    }
-			                }
-			            }
-			        }
-			 }
-		 }
+	    {
+	      if (it->getTrustLevel () == 4)
+	        {
+	          m_trustTable.removeTrustTableEntryByIndex (*it, index);
+	          break;
+	        }
+	      if (it->getTrustLevel () == 5)
+	        {
+	          //after transmission phase in our algorithm begins
+	          //check received collaborative malicious nodes are already blacklisted
+	          if (it->getBlacklist ())
+	            {
+	              m_trustTable.removeTrustTableEntryByIndex (*it,
+	                                                         index);
+	              break;
+	              //broadcast to isolate
+	            }
+	          else
+	            {
+	              for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries ().begin ();
+	                  it2 != m_trustTable.getTrustTableEntries ().end (); it2++)
+	                {
+	                  //blacklist collaborative malicious nodes if they are neighbors
+	                  if (it2->getDestinationNode () == it->getDestinationNode ())
+	                    {
+	                      it->setBlacklist(true);
+	                      //penalty process for neighbors of cm (did in spiral as well!)
+	                      //broadcast to isolate
+	                    }
+	                  else
+	                    {
+	                      //broadcast to isolate
+	                    }
+	                }
+	            }
+	        }
 	      index++;
-	}
+	    }
 }
 
 
@@ -2853,7 +2847,7 @@ RoutingProtocol::ExecuteLast()
 	//recalculate trust and trustLevels
 //	ExecuteFirst ();
 	ReCalculateTrust ();
-	ExecuteSpiralEnd ();
+//	ExecuteSpiralEnd ();
 	Ipv4InterfaceAddress iface;
 
   for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();

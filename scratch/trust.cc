@@ -179,7 +179,7 @@ TrustExample::CreateNodes ()
                                  "DeltaY", DoubleValue (0),
                                  "GridWidth", UintegerValue (size),
                                  "LayoutType", StringValue ("RowFirst"));
-  mobility.SetMobilityModel ("ns3::RandomWalk2dMobilityModel");
+  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.Install (nodes);
   /*ObjectFactory pos;
   pos.SetTypeId ("ns3::RandomRectanglePositionAllocator");
