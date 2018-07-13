@@ -2460,18 +2460,10 @@ RoutingProtocol::RecvTrr (Ipv4Address sender, Ptr<Packet> packet )
 			}
 		  }
 		  m_recommendationTable.addRecommendationTableEntry(recTableEntry);
-		  std::cout << "    "<< std::endl;
-		  //get the node of the owner of recommendation table
-		  Ipv4InterfaceAddress iface;
-		  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
-		        j != m_socketAddresses.end (); ++j)
-		      {
-		        Ptr<Socket> socket = j->first;
-		        iface = j->second;
-		      }
+//		  std::cout << "    "<< std::endl;
 
-		  std::cout << "##############Printing Recommendation table of "<< iface.GetLocal () <<" #############"<<std::endl;
-		  m_recommendationTable.printTable();
+		  /*std::cout << "##############Printing Recommendation table of "<< iface.GetLocal () <<" #############"<<std::endl;
+		  m_recommendationTable.printTable();*/
 	  }
 
     return;
@@ -2558,8 +2550,8 @@ void RoutingProtocol::execute() {
 			sendTRR(iface.GetLocal () , it2->getDestinationNode(), selectedTarget);
 		}
 	}
-  std::cout << "\n  ================== Printing trust table of  "<<iface.GetLocal ()<< " at 30th second ==================" << std::endl;
-	m_trustTable.printTable();
+ /* std::cout << "\n  ================== Printing trust table of  "<<iface.GetLocal ()<< " at 30th seconds ==================" << std::endl;
+	m_trustTable.printTable();*/
 }
 
 void
@@ -2605,6 +2597,16 @@ RoutingProtocol::ExecuteFirst ()
   TrustLevelClassifier trustLevelClassifier;
   trustLevelClassifier.SetBackupTable (&m_backupTable);
   trustLevelClassifier.identifyTrustLevel (&m_trustTable);
+  //get the owner of each table
+  Ipv4InterfaceAddress iface;
+  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
+      j != m_socketAddresses.end (); ++j)
+    {
+      Ptr<Socket> socket = j->first;
+      iface = j->second;
+    }
+  std::cout << "\n  ================== Printing trust table of  " << iface.GetLocal () << " at 10th seconds ==================" << std::endl;
+  m_trustTable.printTable ();
 //  m_backupTable.printTable();
 //  m_trustTable.printTable();
 }
@@ -2729,13 +2731,17 @@ RoutingProtocol::ExecuteBroadcastMal ()
 		  }
 	  }
 
-	std::cout << "Trust table of " << iface.GetLocal ()<< " at 40th seconds" << std::endl;
+	std::cout << "\n--------------------------------- After 40 seconds ------------------------------------" << std::endl;
+  std::cout << "############## Printing Recommendation table of " << iface.GetLocal () << " #############" << std::endl;
+  m_recommendationTable.printTable ();
+
+  std::cout << " ================== Printing Trust tables of  "<< iface.GetLocal () << " ==================" <<std::endl;
 	m_trustTable.printTable();
 }
 
 void RoutingProtocol::ExecuteSpiralEnd ()
 {
-	int index = 0;
+	/*int index = 0;
 	  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
 	      it != m_trustTable.getTrustTableEntries ().end (); it++)
 	    {
@@ -2775,7 +2781,59 @@ void RoutingProtocol::ExecuteSpiralEnd ()
 	            }
 	        }
 	      index++;
-	    }
+	    }*/
+
+	int index = 0;
+  std::vector<RecommendationTableEntry> node_entry_list = m_recommendationTable.getRecommendationTableEntries ();
+  for (std::vector<TrustTableEntry>::iterator it = m_trustTable.getTrustTableEntries ().begin ();
+      it != m_trustTable.getTrustTableEntries ().end (); it++)
+    {
+      if (it->getTrustLevel () == 4)
+        {
+          m_trustTable.removeTrustTableEntryByIndex (*it,
+                                                     index);
+          break;
+        }
+      for (std::vector<RecommendationTableEntry>::iterator recNode = node_entry_list.begin ();
+          recNode != node_entry_list.end (); recNode++)
+        {
+          if (it->getDestinationNode () == recNode->getneighborNodeId () && recNode->getBlacklistStatus () == true)
+            {
+              if (it->getTrustLevel () == 5)
+                {
+                  //after transmission phase in our algorithm begins
+                  //check received collaborative malicious nodes are already blacklisted
+                  if (it->getBlacklist ())
+                    {
+                      m_trustTable.removeTrustTableEntryByIndex (*it,
+                                                                 index);
+                      std::cout << "node removed!!!!!!!!!!!!!!!!! : " << it->getDestinationNode () << std::endl;
+                      break;
+                      //broadcast to isolate
+                    }
+                  else
+                    {
+                      for (std::vector<TrustTableEntry>::iterator it2 = m_trustTable.getTrustTableEntries ().begin ();
+                          it2 != m_trustTable.getTrustTableEntries ().end (); it2++)
+                        {
+                          //blacklist collaborative malicious nodes if they are neighbors
+                          if (it2->getDestinationNode () == it->getDestinationNode ())
+                            {
+                              it->setBlacklist (true);
+                              //penalty process for neighbors of cm (did in spiral as well!)
+                              //broadcast to isolate
+                            }
+                          else
+                            {
+                              //broadcast to isolate
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      index++;
+    }
 }
 
 
@@ -2843,20 +2901,20 @@ RoutingProtocol::ReCalculateTrust()
 void
 RoutingProtocol::ExecuteLast()
 {
-	std::cout << "-------After 90 seconds-------" << std::endl;
+	std::cout << "\n--------------------------------- After 90 seconds ------------------------------------" << std::endl;
 	//recalculate trust and trustLevels
-//	ExecuteFirst ();
+	execute ();
 	ReCalculateTrust ();
-//	ExecuteSpiralEnd ();
+	ExecuteSpiralEnd ();
 	Ipv4InterfaceAddress iface;
-
+	//get the owner of each table
   for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
       j != m_socketAddresses.end (); ++j)
     {
       Ptr<Socket> socket = j->first;
       iface = j->second;
     }
-  std::cout << "\n  ================== Printing tables of  "<<iface.GetLocal () << " ==================" <<std::endl;
+  std::cout << " ================== Printing Trust tables of  "<<iface.GetLocal () << " ==================" <<std::endl;
 	m_trustTable.printTable();
 	m_backupTable.printTable();
 	m_recommendationTable.printTable();

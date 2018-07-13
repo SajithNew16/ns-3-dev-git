@@ -58,13 +58,13 @@ int main (int argc, char *argv[])
   NodeContainer c; // ALL Nodes
   NodeContainer not_malicious;
   NodeContainer malicious;
-  c.Create(4);
+  c.Create(5);
 
   not_malicious.Add(c.Get(1));
   not_malicious.Add(c.Get(0));
   not_malicious.Add(c.Get(3));
+  not_malicious.Add(c.Get(4));
   malicious.Add(c.Get(2));
-
   // Set up WiFi
   WifiHelper wifi;
 
@@ -153,17 +153,24 @@ int main (int argc, char *argv[])
   positionAlloc ->Add(Vector(200, 0, 0)); // node1 
   positionAlloc ->Add(Vector(450, 0, 0)); // node2
   positionAlloc ->Add(Vector(550, 0, 0)); // node3
+  positionAlloc ->Add(Vector(650, 0, 0)); // node4
   mobility.SetPositionAllocator(positionAlloc);
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(c);
 
 
   AnimationInterface anim ("blackhole.xml"); // Mandatory
-  AnimationInterface::SetConstantPosition (c.Get (0), 0, 500);
-//  AnimationInterface::UpdateNodeSize ("10.0.0.1", 5.0, 5.0);
-  AnimationInterface::SetConstantPosition (c.Get (1), 200, 500);
-  AnimationInterface::SetConstantPosition (c.Get (2), 400, 500);
-  AnimationInterface::SetConstantPosition (c.Get (3), 600, 500); 
+  AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
+  AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
+  AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
+  AnimationInterface::SetConstantPosition (c.Get (3), 500, 400);
+  AnimationInterface::SetConstantPosition (c.Get (4), 400, 350);
+  anim.UpdateNodeSize (0, 10, 10);
+  anim.UpdateNodeSize (1, 10, 10);
+  anim.UpdateNodeSize (2, 10, 10);
+  anim.UpdateNodeSize (3, 10, 10);
+  anim.UpdateNodeSize (4, 10, 10);
+  anim.UpdateNodeColor (2,0,0,0);
   anim.EnablePacketMetadata(true);
 
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole.routes", std::ios::out);
@@ -194,7 +201,7 @@ int main (int argc, char *argv[])
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-      if ((t.sourceAddress=="10.0.0.3" && t.destinationAddress == "10.0.0.4"))
+      if ((t.sourceAddress=="10.0.0.4" && t.destinationAddress == "10.0.0.5"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
