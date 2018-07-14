@@ -686,12 +686,21 @@ RoutingProtocol::Forwarding (Ptr<const Packet> p, const Ipv4Header & header,
   Ipv4Address dst = header.GetDestination ();
   Ipv4Address origin = header.GetSource ();
   m_routingTable.Purge ();
+  Ipv4InterfaceAddress iface;
+  //get the owner of executor
+  for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
+      j != m_socketAddresses.end (); ++j)
+    {
+      Ptr<Socket> socket = j->first;
+      iface = j->second;
+    }
+
   RoutingTableEntry toDst;
   /* Code added by Shalini Satre, Wireless Information Networking Group (WiNG), NITK Surathkal for simulating Blackhole Attack */
   /* Check if the node is suppose to behave maliciously */
   if (IsMalicious)
     {  //When malicious node receives packet it drops the packet.
-      std::cout << "Launching Blackhole Attack! Packet dropped . . . \n";
+      std::cout << iface.GetLocal() << " Launching Blackhole Attack! Packet dropped . . . \n";
       return true;
     }
   /* Code for Blackhole attack simulation ends here */
