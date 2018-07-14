@@ -38,7 +38,7 @@ void DirTrustCal::calculateDirectTrust(TrustTable *trustTable)
 		}
 
 	//	double dt = (cp + dp)/(double)(2*interactions);
-		double dt = (cp + dp)*2/(double)(interactions);
+		double dt = (cp + dp)*2.5/(double)(interactions);
 	//	double dt = (cp + dp)/2.0;
 
 		double value = round( dt * 100000.0 ) / 100000.0;

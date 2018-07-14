@@ -2905,7 +2905,7 @@ RoutingProtocol::ExecuteLast()
 	//recalculate trust and trustLevels
 	execute ();
 	ReCalculateTrust ();
-	ExecuteSpiralEnd ();
+//	ExecuteSpiralEnd ();
 	Ipv4InterfaceAddress iface;
 	//get the owner of each table
   for (std::map<Ptr<Socket>, Ipv4InterfaceAddress>::const_iterator j = m_socketAddresses.begin ();
