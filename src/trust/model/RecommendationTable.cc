@@ -69,8 +69,7 @@ void RecommendationTable::printTable()
       std::vector<RecommendationTableEntry> y (recommendationTableRecords.end () - n,
                                        recommendationTableRecords.end ());
       std::cout << ">>>>>>>>>>>>>> Last 5 records of Recommendation Table <<<<<<<<<<<<<<<" << std::endl;
-      std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator
-          << "Analyzed Result" << std::endl;
+      std::cout << "| " << "Neighbor Node" << columnSeperator << "Recommending Nodes" << columnSeperator << "Recommending Value(DT)" << columnSeperator <<"Recommending Value(GT)" << "\t" << columnSeperator << "Matuarity Level" << "\t" << columnSeperator << "Blacklist" << std::endl;
       for (std::vector<RecommendationTableEntry>::iterator it = y.begin (); it != y.end (); it++)
         {
           std::cout << "| " << it->getneighborNodeId() << "\t" << columnSeperator << it->getRecommendingNodes() << "\t\t" << columnSeperator << it->getrecValue_DT() << "\t\t" << columnSeperator << it->getrecValue_GT() << "\t\t" << columnSeperator << it->getMaturityLevel() << "\t\t" << columnSeperator << it->getBlacklistStatus() << "\t\t" << columnSeperator << std::endl;
@@ -79,8 +78,7 @@ void RecommendationTable::printTable()
   //printing all the records for that moment if records count get less than 5
   else
     {
-      std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time Duration" << columnSeperator
-          << "Analyzed Result" << std::endl;
+      std::cout << "| " << "Neighbor Node" << columnSeperator << "Recommending Nodes" << columnSeperator << "Recommending Value(DT)" << columnSeperator <<"Recommending Value(GT)" << "\t" << columnSeperator << "Matuarity Level" << "\t" << columnSeperator << "Blacklist" << std::endl;
       for (std::vector<RecommendationTableEntry>::iterator it = recommendationTableRecords.begin ();
           it != recommendationTableRecords.end (); it++)
         {
