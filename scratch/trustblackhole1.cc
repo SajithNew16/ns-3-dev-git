@@ -63,13 +63,12 @@ int main (int argc, char *argv[])
   not_malicious.Add(c.Get(1));
   not_malicious.Add(c.Get(0));
   not_malicious.Add(c.Get(3));
-  not_malicious.Add(c.Get(4));
   not_malicious.Add(c.Get(5));
   not_malicious.Add(c.Get(6));
   not_malicious.Add(c.Get(7));
   not_malicious.Add(c.Get(9));
   not_malicious.Add(c.Get(8));
-//  malicious.Add(c.Get(8));
+  malicious.Add(c.Get(4));
   malicious.Add(c.Get(2));
   // Set up WiF
   WifiHelper wifi;
@@ -192,7 +191,7 @@ int main (int argc, char *argv[])
   anim.UpdateNodeSize (8, 10, 10);
   anim.UpdateNodeSize (9, 10, 10);
   anim.UpdateNodeColor (2,0,0,0);
-//  anim.UpdateNodeColor (8,0,0,0);
+  anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole1.routes", std::ios::out);
@@ -223,7 +222,7 @@ int main (int argc, char *argv[])
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-      if ((t.sourceAddress=="10.0.0.4" && t.destinationAddress == "10.0.0.5"))
+      if ((t.sourceAddress=="10.0.0.4" && t.destinationAddress == "10.0.0.6"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
