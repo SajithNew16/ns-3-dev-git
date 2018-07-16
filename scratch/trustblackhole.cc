@@ -28,7 +28,7 @@
 #include "ns3/mobility-module.h"
 #include "myapp.h"
 
-NS_LOG_COMPONENT_DEFINE ("Blackhole");
+NS_LOG_COMPONENT_DEFINE ("Blackhole1");
 
 using namespace ns3;
 
@@ -58,14 +58,19 @@ int main (int argc, char *argv[])
   NodeContainer c; // ALL Nodes
   NodeContainer not_malicious;
   NodeContainer malicious;
-  c.Create(5);
+  c.Create(10);
 
   not_malicious.Add(c.Get(1));
   not_malicious.Add(c.Get(0));
   not_malicious.Add(c.Get(3));
-  not_malicious.Add(c.Get(4));
+  not_malicious.Add(c.Get(5));
+  not_malicious.Add(c.Get(6));
+  not_malicious.Add(c.Get(7));
+  not_malicious.Add(c.Get(9));
+  not_malicious.Add(c.Get(8));
+  malicious.Add(c.Get(4));
   malicious.Add(c.Get(2));
-  // Set up WiFi
+  // Set up WiF
   WifiHelper wifi;
 
   YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
@@ -154,26 +159,42 @@ int main (int argc, char *argv[])
   positionAlloc ->Add(Vector(450, 0, 0)); // node2
   positionAlloc ->Add(Vector(550, 0, 0)); // node3
   positionAlloc ->Add(Vector(650, 0, 0)); // node4
+  positionAlloc ->Add(Vector(750, 0, 0)); // node5
+  positionAlloc ->Add(Vector(850, 0, 0)); // node6
+  positionAlloc ->Add(Vector(950, 0, 0)); // node7
+  positionAlloc ->Add(Vector(1000, 0, 0)); // node8
+  positionAlloc ->Add(Vector(250, 0, 0)); // node9
   mobility.SetPositionAllocator(positionAlloc);
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(c);
 
 
-  AnimationInterface anim ("blackhole.xml"); // Mandatory
+  AnimationInterface anim ("blackhole1.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
   AnimationInterface::SetConstantPosition (c.Get (3), 500, 400);
   AnimationInterface::SetConstantPosition (c.Get (4), 400, 350);
+  AnimationInterface::SetConstantPosition (c.Get (5), 450, 250);
+  AnimationInterface::SetConstantPosition (c.Get (6), 500, 200);
+  AnimationInterface::SetConstantPosition (c.Get (7), 700, 100);
+  AnimationInterface::SetConstantPosition (c.Get (8), 900, 200);
+  AnimationInterface::SetConstantPosition (c.Get (9), 900, 250);
   anim.UpdateNodeSize (0, 10, 10);
   anim.UpdateNodeSize (1, 10, 10);
   anim.UpdateNodeSize (2, 10, 10);
   anim.UpdateNodeSize (3, 10, 10);
   anim.UpdateNodeSize (4, 10, 10);
+  anim.UpdateNodeSize (5, 10, 10);
+  anim.UpdateNodeSize (6, 10, 10);
+  anim.UpdateNodeSize (7, 10, 10);
+  anim.UpdateNodeSize (8, 10, 10);
+  anim.UpdateNodeSize (9, 10, 10);
   anim.UpdateNodeColor (2,0,0,0);
+  anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
-      Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole.routes", std::ios::out);
+      Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole1.routes", std::ios::out);
       trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
@@ -201,7 +222,7 @@ int main (int argc, char *argv[])
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-      if ((t.sourceAddress=="10.0.0.4" && t.destinationAddress == "10.0.0.5"))
+      if ((t.sourceAddress=="10.0.0.4" && t.destinationAddress == "10.0.0.6"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
@@ -210,7 +231,7 @@ int main (int argc, char *argv[])
       }
      }
 
-  monitor->SerializeToXmlFile("lab-4.flowmon", true, true);
+  monitor->SerializeToXmlFile("flow1.flowmon", true, true);
 //Flow 1 (10.1.2.2 -> 10.1.2.4)
 
 }
