@@ -227,6 +227,7 @@ int main (int argc, char *argv[])
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
           std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+          std::cout << "  Delivery %:   " << (float)i->second.rxBytes / (float)i->second.txBytes * 100 << "%\n";
           std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
       }
      }

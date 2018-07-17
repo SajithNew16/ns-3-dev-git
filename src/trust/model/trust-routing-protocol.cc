@@ -484,6 +484,15 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       	trustLevelClassifier.SetBackupTable (&m_backupTable);
       	trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
+      for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin (); it != node_entry_vector.end (); it++)
+        {
+          if ( (it->getTrustLevel () == 4 || it->getTrustLevel () == 5)
+              && route->GetDestination () == it->getDestinationNode ())
+            {
+              return Ptr<Ipv4Route> ();
+            }
+        }
+
       return route;
     }
 
