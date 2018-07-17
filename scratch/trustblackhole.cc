@@ -194,8 +194,8 @@ int main (int argc, char *argv[])
   anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
-      Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole1.routes", std::ios::out);
-      trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole1.routes", std::ios::out);
+  trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
   Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback (&ReceivePacket));
