@@ -27,7 +27,7 @@
 #include "ns3/mobility-module.h"
 #include "myapp.h"
 
-NS_LOG_COMPONENT_DEFINE ("Blackhole2");
+NS_LOG_COMPONENT_DEFINE ("Blackhole");
 
 using namespace ns3;
 
@@ -57,29 +57,23 @@ int main (int argc, char *argv[])
   NodeContainer c; // ALL Nodes
   NodeContainer not_malicious;
   NodeContainer malicious;
-  c.Create(20);
+  c.Create(15);
 
-  not_malicious.Add(c.Get(1));
-  not_malicious.Add(c.Get(0));
-  not_malicious.Add(c.Get(3));
-  not_malicious.Add(c.Get(5));
-  not_malicious.Add(c.Get(6));
-  not_malicious.Add(c.Get(7));
-  not_malicious.Add(c.Get(8));
-  not_malicious.Add(c.Get(9));
+  not_malicious.Add (c.Get (1));
+  not_malicious.Add (c.Get (0));
+  not_malicious.Add (c.Get (3));
+  not_malicious.Add (c.Get (5));
+  not_malicious.Add (c.Get (6));
+  not_malicious.Add (c.Get (7));
+  not_malicious.Add (c.Get (9));
+  not_malicious.Add (c.Get (8));
   not_malicious.Add(c.Get(10));
   not_malicious.Add(c.Get(11));
   not_malicious.Add(c.Get(12));
   not_malicious.Add(c.Get(13));
-  not_malicious.Add(c.Get(16));
-  not_malicious.Add(c.Get(17));
-  not_malicious.Add(c.Get(18));
-  not_malicious.Add(c.Get(19));
   not_malicious.Add(c.Get(14));
-  not_malicious.Add(c.Get(15));
-  malicious.Add(c.Get(4));
-  malicious.Add(c.Get(2));
-
+  malicious.Add (c.Get (4));
+  malicious.Add (c.Get (2));
   // Set up WiFi
   WifiHelper wifi;
 
@@ -176,13 +170,9 @@ int main (int argc, char *argv[])
   positionAlloc ->Add(Vector(250, 0, 0)); // node9
   positionAlloc ->Add(Vector(800, 0, 0)); // node10
   positionAlloc ->Add(Vector(900, 0, 0)); // node11
-  positionAlloc ->Add(Vector(300, 0, 0)); // node13
-  positionAlloc ->Add(Vector(400, 0, 0)); // node14
-  positionAlloc ->Add(Vector(500, 0, 0)); // node15
-  positionAlloc ->Add(Vector(600, 0, 0)); // node16
-  positionAlloc ->Add(Vector(700, 0, 0)); // node17
-  positionAlloc ->Add(Vector(350, 0, 0)); // node18
-  positionAlloc ->Add(Vector(975, 0, 0)); // node19
+  positionAlloc ->Add(Vector(300, 0, 0)); // node12
+  positionAlloc ->Add(Vector(400, 0, 0)); // node13
+  positionAlloc ->Add(Vector(500, 0, 0)); // node14
 
   mobility.SetPositionAllocator(positionAlloc);
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -197,27 +187,17 @@ int main (int argc, char *argv[])
   mobility.Install(c);
 
 
-  AnimationInterface anim ("blackhole2.xml"); // Mandatory
+  AnimationInterface anim ("blackhole15n.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
   AnimationInterface::SetConstantPosition (c.Get (3), 500, 400);
   AnimationInterface::SetConstantPosition (c.Get (4), 400, 350);
   AnimationInterface::SetConstantPosition (c.Get (5), 450, 250);
-  AnimationInterface::SetConstantPosition (c.Get (6), 500, 150);
+  AnimationInterface::SetConstantPosition (c.Get (6), 500, 200);
   AnimationInterface::SetConstantPosition (c.Get (7), 700, 100);
   AnimationInterface::SetConstantPosition (c.Get (8), 900, 200);
   AnimationInterface::SetConstantPosition (c.Get (9), 900, 250);
-  AnimationInterface::SetConstantPosition (c.Get (10), 1000, 350);
-  AnimationInterface::SetConstantPosition (c.Get (11), 700, 250);
-  AnimationInterface::SetConstantPosition (c.Get (12), 700, 350);
-  AnimationInterface::SetConstantPosition (c.Get (13), 700, 500);
-  AnimationInterface::SetConstantPosition (c.Get (14), 100, 250);
-  AnimationInterface::SetConstantPosition (c.Get (15), 300, 250);
-  AnimationInterface::SetConstantPosition (c.Get (16), 300, 100);
-  AnimationInterface::SetConstantPosition (c.Get (17), 200, 100);
-  AnimationInterface::SetConstantPosition (c.Get (18), 900, 500);
-  AnimationInterface::SetConstantPosition (c.Get (19), 900, 350);
   anim.UpdateNodeSize (0, 10, 10);
   anim.UpdateNodeSize (1, 10, 10);
   anim.UpdateNodeSize (2, 10, 10);
@@ -233,16 +213,11 @@ int main (int argc, char *argv[])
   anim.UpdateNodeSize (12, 10, 10);
   anim.UpdateNodeSize (13, 10, 10);
   anim.UpdateNodeSize (14, 10, 10);
-  anim.UpdateNodeSize (15, 10, 10);
-  anim.UpdateNodeSize (16, 10, 10);
-  anim.UpdateNodeSize (17, 10, 10);
-  anim.UpdateNodeSize (18, 10, 10);
-  anim.UpdateNodeSize (19, 10, 10);
   anim.UpdateNodeColor (2,0,0,0);
   anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole2.routes", std::ios::out);
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole.routes", std::ios::out);
   aodv.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
@@ -281,7 +256,7 @@ int main (int argc, char *argv[])
       }
      }
 
-  monitor->SerializeToXmlFile("aodvflow2.flowmon", true, true);
+  monitor->SerializeToXmlFile("aodvflow15n.flowmon", true, true);
 //Flow 1 (10.1.2.2 -> 10.1.2.4)
 
 }

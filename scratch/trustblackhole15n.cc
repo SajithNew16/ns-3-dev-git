@@ -1,4 +1,4 @@
-/* Blackhole Attack Simulation with AODV Routing Protocol - Sample Program
+/* Blackhole Attack Simulation with trust Routing Protocol - Sample Program
  * 
  * Network topology
  * 
@@ -14,6 +14,7 @@
  * 2. blackhole.xml file for viewing animation in NetAnim.
  * 
  */
+#include "ns3/trust-module.h"
 #include "ns3/aodv-module.h"
 #include "ns3/netanim-module.h"
 #include "ns3/core-module.h"
@@ -27,7 +28,7 @@
 #include "ns3/mobility-module.h"
 #include "myapp.h"
 
-NS_LOG_COMPONENT_DEFINE ("Blackhole2");
+NS_LOG_COMPONENT_DEFINE ("Blackhole1");
 
 using namespace ns3;
 
@@ -36,7 +37,7 @@ using namespace ns3;
 void
 ReceivePacket(Ptr<const Packet> p, const Address & addr)
 {
-	std::cout << Simulator::Now ().GetSeconds () << "\t" << p->GetSize() <<"\n";
+  std::cout << Simulator::Now ().GetSeconds () << "\t" << p->GetSize() <<"\n";
 }
 
 
@@ -57,7 +58,7 @@ int main (int argc, char *argv[])
   NodeContainer c; // ALL Nodes
   NodeContainer not_malicious;
   NodeContainer malicious;
-  c.Create(20);
+  c.Create(15);
 
   not_malicious.Add(c.Get(1));
   not_malicious.Add(c.Get(0));
@@ -65,22 +66,16 @@ int main (int argc, char *argv[])
   not_malicious.Add(c.Get(5));
   not_malicious.Add(c.Get(6));
   not_malicious.Add(c.Get(7));
-  not_malicious.Add(c.Get(8));
   not_malicious.Add(c.Get(9));
+  not_malicious.Add(c.Get(8));
   not_malicious.Add(c.Get(10));
   not_malicious.Add(c.Get(11));
   not_malicious.Add(c.Get(12));
   not_malicious.Add(c.Get(13));
-  not_malicious.Add(c.Get(16));
-  not_malicious.Add(c.Get(17));
-  not_malicious.Add(c.Get(18));
-  not_malicious.Add(c.Get(19));
   not_malicious.Add(c.Get(14));
-  not_malicious.Add(c.Get(15));
   malicious.Add(c.Get(4));
   malicious.Add(c.Get(2));
-
-  // Set up WiFi
+  // Set up WiF
   WifiHelper wifi;
 
   YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
@@ -89,8 +84,8 @@ int main (int argc, char *argv[])
   YansWifiChannelHelper wifiChannel ;
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::TwoRayGroundPropagationLossModel",
-	  	  	  	  	  	  	  	    "SystemLoss", DoubleValue(1),
-		  	  	  	  	  	  	    "HeightAboveZ", DoubleValue(1.5));
+                                  "SystemLoss", DoubleValue(1),
+                                "HeightAboveZ", DoubleValue(1.5));
 
   // For range near 250m
   wifiPhy.Set ("TxPowerStart", DoubleValue(33));
@@ -119,18 +114,18 @@ int main (int argc, char *argv[])
   devices = wifi.Install (wifiPhy, wifiMac, c);
 
 
-//  Enable AODV
-  AodvHelper aodv;
-  AodvHelper malicious_aodv; 
- 
+//  Enable trust
+  TrustHelper trust;
+  TrustHelper malicious_trust;
+
 
   // Set up internet stack
   InternetStackHelper internet;
-  internet.SetRoutingHelper (aodv);
+  internet.SetRoutingHelper (trust);
   internet.Install (not_malicious);
   
-  malicious_aodv.Set("IsMalicious",BooleanValue(true)); // putting *false* instead of *true* would disable the malicious behavior of the node
-  internet.SetRoutingHelper (malicious_aodv);
+  malicious_trust.Set("IsMalicious",BooleanValue(true)); // putting *false* instead of *true* would disable the malicious behavior of the node
+  internet.SetRoutingHelper (malicious_trust);
   internet.Install (malicious);
 
   // Set up Addresses
@@ -176,35 +171,22 @@ int main (int argc, char *argv[])
   positionAlloc ->Add(Vector(250, 0, 0)); // node9
   positionAlloc ->Add(Vector(800, 0, 0)); // node10
   positionAlloc ->Add(Vector(900, 0, 0)); // node11
-  positionAlloc ->Add(Vector(300, 0, 0)); // node13
-  positionAlloc ->Add(Vector(400, 0, 0)); // node14
-  positionAlloc ->Add(Vector(500, 0, 0)); // node15
-  positionAlloc ->Add(Vector(600, 0, 0)); // node16
-  positionAlloc ->Add(Vector(700, 0, 0)); // node17
-  positionAlloc ->Add(Vector(350, 0, 0)); // node18
-  positionAlloc ->Add(Vector(975, 0, 0)); // node19
-
+  positionAlloc ->Add(Vector(300, 0, 0)); // node12
+  positionAlloc ->Add(Vector(400, 0, 0)); // node13
+  positionAlloc ->Add(Vector(500, 0, 0)); // node14
   mobility.SetPositionAllocator(positionAlloc);
-  mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  /*mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                   "MinX", DoubleValue (0.0),
-                                   "MinY", DoubleValue (0.0),
-                                   "DeltaX", DoubleValue (100),
-                                   "DeltaY", DoubleValue (0),
-                                   "GridWidth", UintegerValue (4),
-                                   "LayoutType", StringValue ("RowFirst"));
-  mobility.SetMobilityModel("ns3::RandomWalk2dMobilityModel");*/
+  mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(c);
 
 
-  AnimationInterface anim ("blackhole2.xml"); // Mandatory
+  AnimationInterface anim ("tblackhole15n.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
   AnimationInterface::SetConstantPosition (c.Get (3), 500, 400);
   AnimationInterface::SetConstantPosition (c.Get (4), 400, 350);
   AnimationInterface::SetConstantPosition (c.Get (5), 450, 250);
-  AnimationInterface::SetConstantPosition (c.Get (6), 500, 150);
+  AnimationInterface::SetConstantPosition (c.Get (6), 500, 200);
   AnimationInterface::SetConstantPosition (c.Get (7), 700, 100);
   AnimationInterface::SetConstantPosition (c.Get (8), 900, 200);
   AnimationInterface::SetConstantPosition (c.Get (9), 900, 250);
@@ -213,11 +195,6 @@ int main (int argc, char *argv[])
   AnimationInterface::SetConstantPosition (c.Get (12), 700, 350);
   AnimationInterface::SetConstantPosition (c.Get (13), 700, 500);
   AnimationInterface::SetConstantPosition (c.Get (14), 100, 250);
-  AnimationInterface::SetConstantPosition (c.Get (15), 300, 250);
-  AnimationInterface::SetConstantPosition (c.Get (16), 300, 100);
-  AnimationInterface::SetConstantPosition (c.Get (17), 200, 100);
-  AnimationInterface::SetConstantPosition (c.Get (18), 900, 500);
-  AnimationInterface::SetConstantPosition (c.Get (19), 900, 350);
   anim.UpdateNodeSize (0, 10, 10);
   anim.UpdateNodeSize (1, 10, 10);
   anim.UpdateNodeSize (2, 10, 10);
@@ -233,17 +210,12 @@ int main (int argc, char *argv[])
   anim.UpdateNodeSize (12, 10, 10);
   anim.UpdateNodeSize (13, 10, 10);
   anim.UpdateNodeSize (14, 10, 10);
-  anim.UpdateNodeSize (15, 10, 10);
-  anim.UpdateNodeSize (16, 10, 10);
-  anim.UpdateNodeSize (17, 10, 10);
-  anim.UpdateNodeSize (18, 10, 10);
-  anim.UpdateNodeSize (19, 10, 10);
   anim.UpdateNodeColor (2,0,0,0);
   anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole2.routes", std::ios::out);
-  aodv.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("blackhole1.routes", std::ios::out);
+  trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
   Config::ConnectWithoutContext("/NodeList/*/ApplicationList/*/$ns3::PacketSink/Rx", MakeCallback (&ReceivePacket));
@@ -269,7 +241,7 @@ int main (int argc, char *argv[])
   std::map<FlowId, FlowMonitor::FlowStats> stats = monitor->GetFlowStats ();
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
-	  Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
+    Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
       if ((t.sourceAddress=="10.0.0.2" && t.destinationAddress == "10.0.0.3"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
@@ -277,11 +249,11 @@ int main (int argc, char *argv[])
           std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
           std::cout << "  Delay Sum:   " << i->second.delaySum << "\n";
           std::cout << "  Delivery %:   " << (float)i->second.rxBytes / (float)i->second.txBytes * 100 << "%\n";
-      	  std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
+          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
       }
      }
 
-  monitor->SerializeToXmlFile("aodvflow2.flowmon", true, true);
+  monitor->SerializeToXmlFile("tflow15n.flowmon", true, true);
 //Flow 1 (10.1.2.2 -> 10.1.2.4)
 
 }
