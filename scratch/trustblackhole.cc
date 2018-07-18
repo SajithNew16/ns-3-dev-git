@@ -222,11 +222,12 @@ int main (int argc, char *argv[])
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-      if ((t.sourceAddress=="10.0.0.2" && t.destinationAddress == "10.0.0.4"))
+      if ((t.sourceAddress=="10.0.0.2" && t.destinationAddress == "10.0.0.3"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
           std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+          std::cout << "  Delay Sum:   " << i->second.delaySum << "\n";
           std::cout << "  Delivery %:   " << (float)i->second.rxBytes / (float)i->second.txBytes * 100 << "%\n";
           std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
       }
