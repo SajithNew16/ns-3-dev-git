@@ -61,6 +61,8 @@ int main (int argc, char *argv[])
 
   not_malicious.Add(c.Get(3));
   not_malicious.Add(c.Get(5));
+  not_malicious.Add(c.Get(6));
+  not_malicious.Add(c.Get(7));
   not_malicious.Add(c.Get(8));
   not_malicious.Add(c.Get(9));
   not_malicious.Add(c.Get(10));
@@ -71,12 +73,8 @@ int main (int argc, char *argv[])
   not_malicious.Add(c.Get(17));
   not_malicious.Add(c.Get(18));
   not_malicious.Add(c.Get(19));
-
-  malicious.Add(c.Get(6));
-  malicious.Add(c.Get(0));
   malicious.Add(c.Get(1));
-  malicious.Add(c.Get(7));
-
+  malicious.Add(c.Get(0));
   malicious.Add(c.Get(14));
   malicious.Add(c.Get(15));
   malicious.Add(c.Get(4));
@@ -197,7 +195,7 @@ int main (int argc, char *argv[])
   mobility.Install(c);
 
 
-  AnimationInterface anim ("aodvmal8.xml"); // Mandatory
+  AnimationInterface anim ("aodvmal6.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
@@ -238,12 +236,8 @@ int main (int argc, char *argv[])
   anim.UpdateNodeSize (17, 10, 10);
   anim.UpdateNodeSize (18, 10, 10);
   anim.UpdateNodeSize (19, 10, 10);
-
-  anim.UpdateNodeColor (6,0,0,0);
-  anim.UpdateNodeColor (0,0,0,0);
   anim.UpdateNodeColor (1,0,0,0);
-  anim.UpdateNodeColor (7,0,0,0);
-
+  anim.UpdateNodeColor (0,0,0,0);
   anim.UpdateNodeColor (2,0,0,0);
   anim.UpdateNodeColor (4,0,0,0);
   anim.UpdateNodeColor (14,0,0,0);
@@ -289,7 +283,7 @@ int main (int argc, char *argv[])
       }
      }
 
-  monitor->SerializeToXmlFile("aodvflowmal8.flowmon", true, true);
+  monitor->SerializeToXmlFile("aodvflowmal6.flowmon", true, true);
 //Flow 1 (10.1.2.2 -> 10.1.2.4)
 
 }
