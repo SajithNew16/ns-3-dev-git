@@ -2682,11 +2682,11 @@ RoutingProtocol::RecvMal ( Ipv4Address sender, Ptr<Packet> packet )
     {
       if (malHeader.GetPMalNode () != "102.102.102.102")
         {
-          std::cout << malHeader.GetDst () << " saying " << malHeader.GetPMalNode () << " is a pure malicious node " <<  std::endl;
+          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetPMalNode () << " is a pure malicious node " <<  std::endl;
         }
       if (malHeader.GetCMalNode () != "102.102.102.102")
         {
-          std::cout << malHeader.GetDst () << " saying " << malHeader.GetCMalNode () << " is a collaborative malicious node " << std::endl;
+          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetCMalNode () << " is a collaborative malicious node " << std::endl;
         }
       return;
     }
