@@ -465,14 +465,14 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
         {
           backup_entry_vector.at(index).SetNeiNode(it->getDestinationNode());
           backup_entry_vector.at(index).SetTrustValue(it->getGlobalTrust());
-          backup_entry_vector.at(index).SetTimeDuration(Simulator::Now()-Time(1));
+          backup_entry_vector.at(index).SetTimeDuration(Simulator::Now().GetSeconds());
           if (it->getGlobalTrust() <= 0.3)
             {
-              backup_entry_vector.at(index).SetResult("Pure or Collaborative malicious");
+              backup_entry_vector.at(index).SetResult("Pure/Collaborative malicious");
             }
           else
             {
-              backup_entry_vector.at(index).SetResult("Trustworthy, Partially Trustworthy or Selfish Nodes");
+              backup_entry_vector.at(index).SetResult("Trustworthy/Partially Trustworthy/Selfish");
             }
           //add entries to m_backupTable
           m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
@@ -484,14 +484,14 @@ RoutingProtocol::RouteOutput (Ptr<Packet> p, const Ipv4Header &header,
       	trustLevelClassifier.SetBackupTable (&m_backupTable);
       	trustLevelClassifier.identifyTrustLevel (&m_trustTable);
 
-      for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin (); it != node_entry_vector.end (); it++)
+      /*for (std::vector<TrustTableEntry>::iterator it = node_entry_vector.begin (); it != node_entry_vector.end (); it++)
         {
           if ( (it->getTrustLevel () == 4 || it->getTrustLevel () == 5)
               && route->GetDestination () == it->getDestinationNode ())
             {
               return Ptr<Ipv4Route> ();
             }
-        }
+        }*/
 
       return route;
     }
@@ -2593,14 +2593,14 @@ RoutingProtocol::ExecuteFirst ()
     {
       backup_entry_vector.at(index).SetNeiNode (it->getDestinationNode());
       backup_entry_vector.at(index).SetTrustValue (it->getGlobalTrust());
-      backup_entry_vector.at(index).SetTimeDuration (Simulator::Now());
+      backup_entry_vector.at(index).SetTimeDuration (Simulator::Now().GetSeconds());
       if (it->getGlobalTrust() <= 0.3)
         {
-      	  backup_entry_vector.at(index).SetResult ("Pure or Collaborative malicious");
+      	  backup_entry_vector.at(index).SetResult ("Pure/Collaborative malicious");
       	}
       else
         {
-      	  backup_entry_vector.at(index).SetResult ("Trustworthy, Partially Trustworthy or Selfish Nodes");
+      	  backup_entry_vector.at(index).SetResult ("Trustworthy/Partially Trustworthy/Selfish");
       	}
       //add entries to m_backupTable
       m_backupTable.addBackupTableEntry(backup_entry_vector.at(index));
@@ -2892,14 +2892,14 @@ RoutingProtocol::ReCalculateTrust()
     {
       backup_entry_vector.at (index).SetNeiNode (it->getDestinationNode ());
       backup_entry_vector.at (index).SetTrustValue (it->getGlobalTrust ());
-      backup_entry_vector.at (index).SetTimeDuration (Simulator::Now () - Time (1));
+      backup_entry_vector.at (index).SetTimeDuration (Simulator::Now ().GetSeconds());
       if (it->getGlobalTrust () <= 0.3)
         {
-          backup_entry_vector.at (index).SetResult ("Pure or Collaborative malicious");
+          backup_entry_vector.at (index).SetResult ("Pure/Collaborative malicious");
         }
       else
         {
-          backup_entry_vector.at (index).SetResult ("Trustworthy, Partially Trustworthy or Selfish Nodes");
+          backup_entry_vector.at (index).SetResult ("Trustworthy/Partially Trustworthy/Selfish");
         }
       //add entries to m_backupTable
       m_backupTable.addBackupTableEntry (backup_entry_vector.at (index));

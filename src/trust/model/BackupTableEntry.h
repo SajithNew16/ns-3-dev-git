@@ -13,7 +13,7 @@ class BackupTableEntry
 private:
 	Ipv4Address neiNode;
 	double trustValue;
-	Time timeDuration;
+	double timeDuration;
 	std::string result;
 public:
 	BackupTableEntry ();
@@ -23,8 +23,8 @@ public:
 	double GetTrustValue ();
 	void SetResult (std::string result);
 	std::string GetResult ();
-	void SetTimeDuration (Time timeDuration);
-	Time GetTimeDuration ();
+	void SetTimeDuration (double timeDuration);
+	double GetTimeDuration ();
 	~BackupTableEntry ();
 };
 

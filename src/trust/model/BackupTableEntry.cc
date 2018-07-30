@@ -46,12 +46,12 @@ BackupTableEntry::GetResult()
 }
 
 void
-BackupTableEntry::SetTimeDuration (Time timeDuration)
+BackupTableEntry::SetTimeDuration (double timeDuration)
 {
 	this->timeDuration = timeDuration;
 }
 
-Time
+double
 BackupTableEntry::GetTimeDuration()
 {
 	return this->timeDuration;
