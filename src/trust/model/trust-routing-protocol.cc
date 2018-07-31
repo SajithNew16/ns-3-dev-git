@@ -665,9 +665,9 @@ RoutingProtocol::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
           if (it->getDestinationNode () == origin)
             {
               it->incNDR ();
-              if (origin == "10.0.0.3" || origin == "10.0.0.5")
+              if (origin == "10.0.0.3")
                 {
-                  for (int i = 0; i < 20; i++)
+                  for (int i = 0; i < 25; i++)
                     {
                       it->incNDR ();
                     }

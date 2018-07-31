@@ -34,7 +34,7 @@ void BackupTable::printTable()
 		std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time" << columnSeperator << "Analyzed Result" << std::endl;
 		for (std::vector<BackupTableEntry>::iterator it = y.begin(); it != y.end(); it++)
 		  {
-		    std::cout << "| " << it->GetNeiNode () << columnSeperator << it->GetTrustValue () << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
+		    std::cout << "| " << it->GetNeiNode () << columnSeperator << it->GetTrustValue () << " " << columnSeperator << it->GetTimeDuration () << " " << columnSeperator << it->GetResult () << std::endl;
 		  }
 	  }
 	//printing all the records for that moment if records count get less than 5
@@ -44,7 +44,7 @@ void BackupTable::printTable()
 		std::cout << "| " << "Node" << columnSeperator << "Trust Value" << columnSeperator << "Time" << columnSeperator << "Analyzed Result" << std::endl;
 		for (std::vector<BackupTableEntry>::iterator it = backupTableRecords.begin(); it != backupTableRecords.end(); it++)
 		  {
-			std::cout << "| " << it->GetNeiNode () << columnSeperator << it->GetTrustValue () << "\t" << columnSeperator << it->GetTimeDuration () << "\t\t" << columnSeperator << it->GetResult () << std::endl;
+			std::cout << "| " << it->GetNeiNode () << columnSeperator << it->GetTrustValue () << " " << columnSeperator << it->GetTimeDuration () << " " << columnSeperator << it->GetResult () << std::endl;
 		  }
 	  }
 }
