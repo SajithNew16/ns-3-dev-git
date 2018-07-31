@@ -63,7 +63,7 @@ void TrustLevelClassifier::identifyTrustLevel(TrustTable* trustTable)
               if (past_global_trust_range[0] <= node_GT && past_global_trust_range[1] >= node_GT)
                 {
                   it->setTrustLevel (4);
-                  it->setBlacklist (false);
+                  it->setBlacklist (true);
                 }
               else
                 {
