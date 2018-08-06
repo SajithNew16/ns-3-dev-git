@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
 
   AnimationInterface anim ("tblackhole5n.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
-  AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
+  AnimationInterface::SetConstantPosition (c.Get (1), 220, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
   AnimationInterface::SetConstantPosition (c.Get (3), 500, 400);
   AnimationInterface::SetConstantPosition (c.Get (4), 400, 350);
