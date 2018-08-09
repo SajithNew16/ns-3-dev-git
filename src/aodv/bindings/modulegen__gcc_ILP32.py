@@ -8695,6 +8695,10 @@ def register_Ns3AodvRoutingTableEntry_methods(root_module, cls):
     cls.add_method('SetValidSeqNo', 
                    'void', 
                    [param('bool', 's')])
+    ## aodv-rtable.h (module 'aodv'): void ns3::aodv::RoutingTableEntry::Testing() [member function]
+    cls.add_method('Testing',
+                   'void',
+                   [param('uint32_t', 'i')])
     ## aodv-rtable.h (module 'aodv'): ns3::aodv::RoutingTableEntry::m_ackTimer [variable]
     cls.add_instance_attribute('m_ackTimer', 'ns3::Timer', is_const=False)
     return

@@ -37,6 +37,8 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("WifiHelper");
 
+
+
 /**
  * ASCII trace Phy transmit sink with context
  * \param stream the output stream
@@ -694,7 +696,15 @@ WifiHelper::~WifiHelper ()
 WifiHelper::WifiHelper ()
   : m_standard (WIFI_PHY_STANDARD_80211a)
 {
-  SetRemoteStationManager ("ns3::ArfWifiManager");
+//  SetRemoteStationManager ("ns3::ArfWifiManager");
+}
+
+WifiHelper
+WifiHelper::Default (void)
+{
+  WifiHelper helper;
+  helper.SetRemoteStationManager ("ns3::ArfWifiManager");
+  return helper;
 }
 
 void

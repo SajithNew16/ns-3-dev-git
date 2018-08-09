@@ -66,6 +66,15 @@ RoutingTableEntry::~RoutingTableEntry ()
 {
 }
 
+void
+RoutingTableEntry::Testing(uint32_t i)
+{
+    for (uint32_t j = 0; j <= i; j++)
+        {
+            std::cout << j << "\n";
+        }
+}
+
 bool
 RoutingTableEntry::InsertPrecursor (Ipv4Address id)
 {

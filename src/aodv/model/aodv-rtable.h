@@ -343,6 +343,8 @@ public:
    */
   void Print (Ptr<OutputStreamWrapper> stream) const;
 
+  void Testing(uint32_t i);
+
 private:
   /// Valid Destination Sequence Number flag
   bool m_validSeqNo;
