@@ -305,9 +305,9 @@ def main(argv, action=None):
 					actor.remember(X_prev, action,reward, X_train,False)            
 													  
 				table = BeautifulTable()
-				table.column_headers = ["Flow id","Source", "Destination", "reward"]
-				table.append_row([flow_id, t.sourceAddress,t.destinationAddress, reward])
-				#print(table)				
+				table.column_headers = ["Flow id","Source", "Destination", "reward", "q_value"]
+				table.append_row([flow_id, t.sourceAddress,t.destinationAddress, reward, q_value])
+				print(table)				
 				
 				'''if ( 0.010973 >= q_value >= 0.000589):
 					print ("A trust route found..")
