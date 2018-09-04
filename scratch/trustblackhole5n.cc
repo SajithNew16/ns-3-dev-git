@@ -203,12 +203,12 @@ int main (int argc, char *argv[])
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
       if ((t.sourceAddress=="10.0.0.5" && t.destinationAddress == "10.0.0.4"))
       {
-          std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
-          std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
-          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
-          std::cout << "  Delay Sum:   " << i->second.delaySum << "\n";
-          std::cout << "  Delivery %:   " << (float)i->second.rxBytes / (float)i->second.txBytes * 100 << "%\n";
-          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
+//          std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
+//          std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
+//          std::cout << "  Rx Bytes:   " << i->second.rxBytes << "\n";
+//          std::cout << "  Delay Sum:   " << i->second.delaySum << "\n";
+//          std::cout << "  Delivery %:   " << (float)i->second.rxBytes / (float)i->second.txBytes * 100 << "%\n";
+//          std::cout << "  Throughput: " << i->second.rxBytes * 8.0 / (i->second.timeLastRxPacket.GetSeconds() - i->second.timeFirstTxPacket.GetSeconds())/1024/1024  << " Mbps\n";
       }
      }
 

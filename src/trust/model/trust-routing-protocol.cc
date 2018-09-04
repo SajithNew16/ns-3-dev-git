@@ -2619,8 +2619,8 @@ RoutingProtocol::ExecuteFirst ()
       Ptr<Socket> socket = j->first;
       iface = j->second;
     }
-  std::cout << "\n  ================== Printing trust table of  " << iface.GetLocal () << " at 10th seconds ==================" << std::endl;
-  m_trustTable.printTable ();
+//  std::cout << "\n  ================== Printing trust table of  " << iface.GetLocal () << " at 10th seconds ==================" << std::endl;
+//  m_trustTable.printTable ();
 //  m_backupTable.printTable();
 //  m_trustTable.printTable();
 }
@@ -2679,14 +2679,14 @@ RoutingProtocol::RecvMal ( Ipv4Address sender, Ptr<Packet> packet )
 
   if (IsMyOwnAddress (malHeader.GetOrigin ()))
     {
-      if (malHeader.GetPMalNode () != "102.102.102.102")
-        {
-          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetPMalNode () << " is a pure malicious node " <<  std::endl;
-        }
-      if (malHeader.GetCMalNode () != "102.102.102.102")
-        {
-          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetCMalNode () << " is a collaborative malicious node " << std::endl;
-        }
+//      if (malHeader.GetPMalNode () != "102.102.102.102")
+//        {
+//          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetPMalNode () << " is a pure malicious node " <<  std::endl;
+//        }
+//      if (malHeader.GetCMalNode () != "102.102.102.102")
+//        {
+//          std::cout << malHeader.GetDst () << " notifying " << malHeader.GetCMalNode () << " is a collaborative malicious node " << std::endl;
+//        }
       return;
     }
 
@@ -2745,12 +2745,16 @@ RoutingProtocol::ExecuteBroadcastMal ()
 		  }
 	  }
 
-	std::cout << "\n--------------------------------- After 40 seconds ------------------------------------" << std::endl;
-  std::cout << "############## Printing Recommendation table of " << iface.GetLocal () << " #############" << std::endl;
-  m_recommendationTable.printTable ();
+//	std::cout << "\n--------------------------------- After 40 seconds ------------------------------------" << std::endl;
+//  std::cout << "############## Printing Recommendation table of " << iface.GetLocal () << " #############" << std::endl;
+//  m_recommendationTable.printTable ();
+//
+//  std::cout << " ================== Printing Trust tables of  "<< iface.GetLocal () << " ==================" <<std::endl;
+//	m_trustTable.printTable();
 
-  std::cout << " ================== Printing Trust tables of  "<< iface.GetLocal () << " ==================" <<std::endl;
-	m_trustTable.printTable();
+//	 std::cout << " ================== Printing Backup tables of  "<< iface.GetLocal () << " ==================" <<std::endl;
+//	 m_backupTable.printTable();
+
 }
 
 void RoutingProtocol::ExecuteSpiralEnd ()
@@ -2915,7 +2919,7 @@ RoutingProtocol::ReCalculateTrust()
 void
 RoutingProtocol::ExecuteLast()
 {
-	std::cout << "\n--------------------------------- After 90 seconds ------------------------------------" << std::endl;
+//	std::cout << "\n--------------------------------- After 90 seconds ------------------------------------" << std::endl;
 	//recalculate trust and trustLevels
 	execute ();
 	ReCalculateTrust ();
@@ -2928,10 +2932,10 @@ RoutingProtocol::ExecuteLast()
       Ptr<Socket> socket = j->first;
       iface = j->second;
     }
-  std::cout << " ================== Printing Trust tables of  "<<iface.GetLocal () << " ==================" <<std::endl;
-	m_trustTable.printTable();
+  std::cout << " ================== Printing Backup tables of  "<<iface.GetLocal () << " ==================" <<std::endl;
+//	m_trustTable.printTable();
 	m_backupTable.printTable();
-	m_recommendationTable.printTable();
+//	m_recommendationTable.printTable();
 }
 
 
