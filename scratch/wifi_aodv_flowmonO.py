@@ -48,7 +48,7 @@ except ImportError:
     pass
 
 DISTANCE = 100 # (m)
-NUM_NODES_SIDE = 2
+NUM_NODES_SIDE = 3
 actor = []
 action = 0
 q_value = 0.0
@@ -77,7 +77,8 @@ def main(argv, action=None):
     wifiChannel = ns.wifi.YansWifiChannelHelper.Default()
     wifiPhy.SetChannel(wifiChannel.Create())
     ssid = ns.wifi.Ssid("wifi-default")
-    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager","DataMode", ns.core.StringValue ("OfdmRate54Mbps"))
+    # obj = "ns3::ArfWifiManager"
+    wifi.SetRemoteStationManager("ns3::ArfWifiManager")
     wifiMac.SetType ("ns3::AdhocWifiMac",
                      "Ssid", ns.wifi.SsidValue(ssid))
 
@@ -100,7 +101,7 @@ def main(argv, action=None):
     port = 9   # Discard port(RFC 863)
     onOffHelper = ns.applications.OnOffHelper("ns3::UdpSocketFactory",
                                   ns.network.Address(ns.network.InetSocketAddress(ns.network.Ipv4Address("10.0.0.1"), port)))
-    onOffHelper.SetAttribute("DataRate", ns.network.DataRateValue(ns.network.DataRate("450kbps")))
+    onOffHelper.SetAttribute("DataRate", ns.network.DataRateValue(ns.network.DataRate("100kbps")))
     onOffHelper.SetAttribute("OnTime", ns.core.StringValue ("ns3::ConstantRandomVariable[Constant=1]"))
     onOffHelper.SetAttribute("OffTime", ns.core.StringValue ("ns3::ConstantRandomVariable[Constant=0]"))
 
@@ -151,21 +152,38 @@ def main(argv, action=None):
     routing_stream = ns.network.OutputStreamWrapper("routes", ns.network.STD_IOS_OUT) 
     aodv_routing.PrintRoutingTableAllAt (ns.core.Seconds(25), routing_stream)
     
+    stream = ns.network.OutputStreamWrapper("RREQ-routes", ns.network.STD_IOS_OUT) 
+
+    
     rreq = ns.aodv.aodv.RreqHeader()
     rrep = ns.aodv.aodv.RrepHeader()
     rerr = ns.aodv.aodv.RerrHeader()
     
-    #dire = dir(ns.flow_monitor)
-    #print dire
+    dire = dir(ns.flow_monitor.FlowMonitor)
+    # print dire
 
-    '''rtable = ns.aodv.aodv.RoutingTableEntry()    
-    print "Access from aodv ", rtable.Testing(5)
+    rtable = ns.aodv.aodv.RoutingTableEntry()
+    
+    # print "Access from aodv ", rtable.Testing(3)
+    
+    def printRREQ(req):
+	print "**************RREQ*********************"
+	print "RREQ Id : " , req.GetId()
+	print "Originator IP Adress : " , req.GetOrigin()
+        print "Destination IP Adress : " , req.GetDst()
+        print "Destination Sequence Number : " , req.GetDstSeqno()      
+        print "Hop Count : " , req.GetHopCount()
 
-    flow = ns.flow_monitor.FlowMonitor()
-    print "Double value ", flow.GetQValue()'''
-           
+    def printRREP(rep):
+	print "**************RREP**********************"
+	print "Originator IP Adress : " , rep.GetOrigin()
+        print "Destination IP Adress : " , rep.GetDst()
+        print "Destination Sequence Number : " , rep.GetDstSeqno()      
+        print "Hop Count : " , rep.GetHopCount()
+    
+
     ns.core.Simulator.Stop(ns.core.Seconds(100.0))
-    #ns.core.Simulator.Schedule(ns.core.Seconds(40), rtable.Testing(5))
+    #ns.core.Simulator.Schedule(ns.core.Seconds(40), printRREQ(rreq))
     ns.core.Simulator.Run()  
 
     #printRREQ(rreq)
@@ -183,6 +201,7 @@ def main(argv, action=None):
             print >> os, "  Mean{Delay}: ", (st.delaySum.GetSeconds() / st.rxPackets)
 	    print >> os, "  Mean{Jitter}: ", (st.jitterSum.GetSeconds() / st.rxPackets)
             print >> os, "  Mean{Hop Count}: ", float(st.timesForwarded) / st.rxPackets + 1
+
         
         if 0:
             print >> os, "Delay Histogram"
@@ -203,7 +222,7 @@ def main(argv, action=None):
         for reason, drops in enumerate(st.bytesDropped):
             print "Bytes dropped by reason %i: %i" % (reason, drops)
 
-    # Edited Node_details by Wayomi Jayantha #
+    
     def Node_details():
 	    data = np.genfromtxt('aodv_routes.txt',delimiter='	')
 	    Expire = data[:,][:,4]
@@ -228,21 +247,20 @@ def main(argv, action=None):
        count = 0
        X_train = []
        reward =0 
-       #actor = DQNAgent(7, num_nodes_side)       
+       actor = DQNAgent(3, num_nodes_side)
        for e in range(2):	
         if e > 0:
             #action = actor.act(X_train)     
-	    #print ("episode: {}/{}".format(e, 2))
-	    #actor = DQNAgent(7, num_nodes_side) 	              
+	    #print ("episode: {}/{}".format(e, 2))	              
             for i in range(1,((num_nodes_side**(2))+1)):	
-	    	print "Parameters extracted for node:",i
+	    	#print "Parameters extracted for node:",i
 		#actor = DQNAgent(7, num_nodes_side) 
 		for flow_id, flow_stats in monitor.GetFlowStats():
             		t = classifier.FindFlow(flow_id)
             		proto = {6: 'TCP', 17: 'UDP'} [t.protocol]
             		#print "FlowID: %i (%s %s/%s --> %s/%i)" % \
                 		#(flow_id, proto, t.sourceAddress, t.sourcePort, t.destinationAddress, t.destinationPort)  
-			actor = DQNAgent(7, num_nodes_side)  
+			#actor = DQNAgent(7, num_nodes_side)  
 			if(t.sourceAddress == (ns.network.Ipv4Address("10.0.0."+str(i)))):				
 				flow_array = []
 				flow_array.append(flow_stats.txBytes)
@@ -287,10 +305,9 @@ def main(argv, action=None):
 					actor.remember(X_prev, action,reward, X_train,False)            
 													  
 				table = BeautifulTable()
-				table.column_headers = ["Flow id","Source", "Destination", "reward"]
-				table.append_row([flow_id, t.sourceAddress,t.destinationAddress, reward])
-				print(table)
-				print "Q-value of flow ", flow_id, " is ", q_value				
+				table.column_headers = ["Flow id","Source", "Destination", "reward", "q_value"]
+				table.append_row([flow_id, t.sourceAddress,t.destinationAddress, reward, q_value])
+				print(table)				
 				
 				'''if ( 0.010973 >= q_value >= 0.000589):
 					print ("A trust route found..")
@@ -299,7 +316,7 @@ def main(argv, action=None):
 				if ( 0.000099 >= q_value >= -5.00):
 					print ("A malicious route found..")'''
 					
-		print "Q-value of "+ str(i) + " node is " , q_value 							    
+		    #print "Q-value of "+ str(i) + " node is " , q_value
 		actor.remember(X_prev, action, reward, X_train, True)		
        actor.replay(1)
                      
