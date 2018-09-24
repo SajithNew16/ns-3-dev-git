@@ -20,6 +20,9 @@ import sys
 import matplotlib
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+import tensorflow as tf
+
+import csv
 
 import pandas as pd
 from keras.preprocessing import sequence
@@ -27,6 +30,7 @@ from sklearn import preprocessing
 
 matplotlib.use('TkAgg')
 import numpy as np
+import scipy
 import ns.applications
 import ns.core
 import ns.flow_monitor
@@ -76,18 +80,22 @@ def main(argv, action=None):
     wifiChannel = ns.wifi.YansWifiChannelHelper.Default()
     wifiPhy.SetChannel(wifiChannel.Create())
     ssid = ns.wifi.Ssid("wifi-default")
-    wifi.SetRemoteStationManager("ns3::ArfWifiManager")
+    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager","DataMode", ns.core.StringValue ("OfdmRate54Mbps"))
     wifiMac.SetType ("ns3::AdhocWifiMac",
                      "Ssid", ns.wifi.SsidValue(ssid))
 
     internet = ns.internet.InternetStackHelper()
     list_routing = ns.internet.Ipv4ListRoutingHelper()
     trust_routing = ns.trust.TrustHelper()
+    malicious_trust_routing = ns.trust.TrustHelper()
     static_routing = ns.internet.Ipv4StaticRoutingHelper()
     list_routing.Add(static_routing, 0)
     list_routing.Add(trust_routing, 100)
     internet.SetRoutingHelper(list_routing)
     internet.SetRoutingHelper(trust_routing)
+
+    #malicious_trust_routing.Set("IsMalicious",ns.core.BooleanValue(True))
+    #internet.SetRoutingHelper(malicious_trust_routing)
 
     ipv4Addresses = ns.internet.Ipv4AddressHelper()
     ipv4Addresses.SetBase(ns.network.Ipv4Address("10.0.0.0"), ns.network.Ipv4Mask("255.255.255.0"))
@@ -95,7 +103,7 @@ def main(argv, action=None):
     port = 9   # Discard port(RFC 863)
     onOffHelper = ns.applications.OnOffHelper("ns3::UdpSocketFactory",
                                   ns.network.Address(ns.network.InetSocketAddress(ns.network.Ipv4Address("10.0.0.1"), port)))
-    onOffHelper.SetAttribute("DataRate", ns.network.DataRateValue(ns.network.DataRate("100kbps")))
+    onOffHelper.SetAttribute("DataRate", ns.network.DataRateValue(ns.network.DataRate("450kbps")))
     onOffHelper.SetAttribute("OnTime", ns.core.StringValue ("ns3::ConstantRandomVariable[Constant=1]"))
     onOffHelper.SetAttribute("OffTime", ns.core.StringValue ("ns3::ConstantRandomVariable[Constant=0]"))
 
@@ -128,12 +136,15 @@ def main(argv, action=None):
 
     for i, node in enumerate(nodes):
         destaddr = addresses[action]
+        #print i, destaddr
         onOffHelper.SetAttribute("Remote", ns.network.AddressValue(ns.network.InetSocketAddress(destaddr, port)))
         app = onOffHelper.Install(ns.network.NodeContainer(node))
         urv = ns.core.UniformRandomVariable()
         app.Start(ns.core.Seconds(urv.GetValue(20, 30)))   
 	
+    #internet.EnablePcapAll("wifi-trust")
     flowmon_helper = ns.flow_monitor.FlowMonitorHelper()
+    #flowmon_helper.SetMonitorAttribute("StartTime", ns.core.TimeValue(ns.core.Seconds(31)))
     monitor = flowmon_helper.InstallAll()
     monitor = flowmon_helper.GetMonitor()
     monitor.SetAttribute("DelayBinWidth", ns.core.DoubleValue(0.001))
@@ -142,25 +153,99 @@ def main(argv, action=None):
 
     routing_stream = ns.network.OutputStreamWrapper("routes", ns.network.STD_IOS_OUT) 
     trust_routing.PrintRoutingTableAllAt (ns.core.Seconds(25), routing_stream)
+    
+    rreq = ns.trust.trust.RreqHeader()
+    rrep = ns.trust.trust.RrepHeader()
+    rerr = ns.trust.trust.RerrHeader()
+    
+    #dire = dir(ns.flow_monitor)
+    #print dire
 
+    '''rtable = ns.trust.trust.RoutingTableEntry()    
+    print "Access from trust ", rtable.Testing(5)
+
+    flow = ns.flow_monitor.FlowMonitor()
+    print "Double value ", flow.GetQValue()'''
+           
     ns.core.Simulator.Stop(ns.core.Seconds(100.0))
-    ns.core.Simulator.Run()
+    #ns.core.Simulator.Schedule(ns.core.Seconds(40), rtable.Testing(5))
+    ns.core.Simulator.Run()  
+
+    #printRREQ(rreq)
+    #printRREP(rrep)
+  
+    
+    def print_stats(os, st):
+        print >> os, "  Tx Bytes: ", st.txBytes
+        print >> os, "  Rx Bytes: ", st.rxBytes
+        print >> os, "  Tx Packets: ", st.txPackets
+        print >> os, "  Rx Packets: ", st.rxPackets
+        print >> os, "  Lost Packets: ", st.lostPackets
+
+        if st.rxPackets > 0:
+            print >> os, "  Mean{Delay}: ", (st.delaySum.GetSeconds() / st.rxPackets)
+	    print >> os, "  Mean{Jitter}: ", (st.jitterSum.GetSeconds() / st.rxPackets)
+            print >> os, "  Mean{Hop Count}: ", float(st.timesForwarded) / st.rxPackets + 1
+        
+        if 0:
+            print >> os, "Delay Histogram"
+            for i in range(st.delayHistogram.GetNBins () ):
+              print >> os, " ",i,"(", st.delayHistogram.GetBinStart (i), "-", \
+                  st.delayHistogram.GetBinEnd (i), "): ", st.delayHistogram.GetBinCount (i)
+            print >> os, "Jitter Histogram"
+            for i in range(st.jitterHistogram.GetNBins () ):
+              print >> os, " ",i,"(", st.jitterHistogram.GetBinStart (i), "-", \
+                  st.jitterHistogram.GetBinEnd (i), "): ", st.jitterHistogram.GetBinCount (i)
+            print >> os, "PacketSize Histogram"
+            for i in range(st.packetSizeHistogram.GetNBins () ):
+              print >> os, " ",i,"(", st.packetSizeHistogram.GetBinStart (i), "-", \
+                  st.packetSizeHistogram.GetBinEnd (i), "): ", st.packetSizeHistogram.GetBinCount (i)
+
+        for reason, drops in enumerate(st.packetsDropped):
+            print "  Packets dropped by reason %i: %i" % (reason, drops)
+        for reason, drops in enumerate(st.bytesDropped):
+            print "Bytes dropped by reason %i: %i" % (reason, drops)
+
+    # Edited Node_details by Wayomi Jayantha #
+    def Node_details():
+	    data = np.genfromtxt('trust_routes.txt',delimiter='	')
+	    Expire = data[:,][:,4]
+	    j=0;
+	    k=9;
+
+    	    for n in range(9):
+		    node = Expire[j:k]
+                    avg_expire= np.mean(node)
+                    print("Average Expire of node %i : %f" %(n,avg_expire))
+                    j += 10
+		    k += 10
+		    if(avg_expire>= 3.18):
+				print "reputed Nodes Found"
+			        print "Node id :",n
 
     monitor.CheckForLostPackets()
     classifier = flowmon_helper.GetClassifier() 
 
     if cmd.Results is None:       
        X_prev = []
+       count = 0
        X_train = []
        reward =0 
-       actor = DQNAgent(3, num_nodes_side)
-       for e in range(2):
+       #actor = DQNAgent(7, num_nodes_side)       
+       for e in range(2):	
         if e > 0:
-            for i in range(1,((num_nodes_side**(2))+1)):
+            #action = actor.act(X_train)     
+	    #print ("episode: {}/{}".format(e, 2))
+	    #actor = DQNAgent(7, num_nodes_side) 	              
+            for i in range(1,((num_nodes_side**(2))+1)):	
+	    	print "Parameters extracted for node:",i
+		#actor = DQNAgent(7, num_nodes_side) 
 		for flow_id, flow_stats in monitor.GetFlowStats():
             		t = classifier.FindFlow(flow_id)
             		proto = {6: 'TCP', 17: 'UDP'} [t.protocol]
-			if(t.sourceAddress == (ns.network.Ipv4Address("10.0.0."+str(i)))):
+            		
+			actor = DQNAgent(7, num_nodes_side)  
+			if(t.sourceAddress == (ns.network.Ipv4Address("10.0.0."+str(i)))):				
 				flow_array = []
 				flow_array.append(flow_stats.txBytes)
 				flow_array.append(flow_stats.rxBytes)
@@ -188,25 +273,30 @@ def main(argv, action=None):
 								             value=0.) 
 				action = actor.act(X_train) 
 								 
-				try:
-					reward=((0.1*(flow_stats.delaySum.GetSeconds() / flow_stats.rxPackets)+0.2*(flow_stats.jitterSum.GetSeconds() / (flow_stats.rxPackets-1))+0.1*(float(flow_stats.timesForwarded) / flow_stats.rxPackets + 1)+(0.5*(flow_stats.rxPackets)/(flow_stats.txPackets))) + 0.1*(flow_stats.lostPackets))
-
-				except ZeroDivisionError:
-					flow_stats.delaySum.GetSeconds() == 0
-					flow_stats.jitterSum.GetSeconds() == 0
-					    
+				reward = []
+				with open('gt.csv') as csv_file:
+    					csv_reader = csv.reader(csv_file, delimiter=',')
+					for row in csv_reader:
+						if str(t.sourceAddress) == row[0] and str(t.destinationAddress) == row[1]:
+							reward.append(row[2])
+							
 			 	q_value = actor.q_values(X_train)		
 					    
 				if flow_id != 1:
 					actor.remember(X_prev, action,reward, X_train,False)            
 													  
-				table = BeautifulTable()
-				table.column_headers = ["Flow id","Source", "Destination", "reward","q_value"]
-				table.append_row([flow_id, t.sourceAddress,t.destinationAddress, reward,q_value])
-				print(table)
+					table = BeautifulTable()
+					table.column_headers = ["Flow id","Source", "Destination", "reward"]
+					table.append_row([flow_id, t.sourceAddress,t.destinationAddress, float(reward[0])])
+					print(table)
+					print "Q-value of flow ", flow_id, " is ", q_value, " Source ", t.sourceAddress, " Destination ", t.destinationAddress, " reward ", float(reward[0])				
 					
-		actor.remember(X_prev, action, reward, X_train, True)
+       		print "Q-value of "+ str(i) + " node is " , q_value 
 
+       					    
+       		actor.remember(X_prev, action, reward, X_train, True)		
+       actor.replay(1)
+                     
     else:
         print monitor.SerializeToXmlFile(cmd.Results, True, True)
 

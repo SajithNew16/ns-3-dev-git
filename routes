@@ -1,0 +1,42 @@
+Node: 0; Time: +25.0s, Local time: +25.0s, TRUST Routing table
+
+TRUST Routing table
+Destination	Gateway		Interface	Flag	Expire		Hops
+10.0.0.2	10.0.0.2	10.0.0.1	UP	2.01          	1
+10.0.0.3	10.0.0.3	10.0.0.1	DOWN	11.07         	1
+10.0.0.255	10.0.0.255	10.0.0.1	UP	9223372011.85 	1
+127.0.0.1	127.0.0.1	127.0.0.1	UP	9223372011.85 	1
+
+
+Node: 1; Time: +25.00s, Local time: +25.00s, TRUST Routing table
+
+TRUST Routing table
+Destination	Gateway		Interface	Flag	Expire		Hops
+10.0.0.1	10.0.0.1	10.0.0.2	UP	2.99          	1
+10.0.0.3	10.0.0.3	10.0.0.2	UP	2.93          	1
+10.0.0.4	10.0.0.4	10.0.0.2	UP	13.07         	1
+10.0.0.255	10.0.0.255	10.0.0.2	UP	9223372011.85 	1
+127.0.0.1	127.0.0.1	127.0.0.1	UP	9223372011.85 	1
+
+
+Node: 2; Time: +25.00s, Local time: +25.00s, TRUST Routing table
+
+TRUST Routing table
+Destination	Gateway		Interface	Flag	Expire		Hops
+10.0.0.1	10.0.0.1	10.0.0.3	IN_SEARCH	4.52          	35
+10.0.0.2	10.0.0.2	10.0.0.3	UP	2.01          	1
+10.0.0.4	10.0.0.4	10.0.0.3	UP	14.26         	1
+10.0.0.255	10.0.0.255	10.0.0.3	UP	9223372011.85 	1
+127.0.0.1	127.0.0.1	127.0.0.1	UP	9223372011.85 	1
+
+
+Node: 3; Time: +25.00s, Local time: +25.00s, TRUST Routing table
+
+TRUST Routing table
+Destination	Gateway		Interface	Flag	Expire		Hops
+10.0.0.2	10.0.0.2	10.0.0.4	UP	2.01          	1
+10.0.0.3	10.0.0.3	10.0.0.4	UP	2.93          	1
+10.0.0.255	10.0.0.255	10.0.0.4	UP	9223372011.85 	1
+127.0.0.1	127.0.0.1	127.0.0.1	UP	9223372011.85 	1
+
+

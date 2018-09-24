@@ -40,16 +40,18 @@ class DQNAgent:
     def act(self, state): 
         if np.random.rand() <= self.epsilon:
             return np.random.randint(1, self.action_size) 	     	    
-        act_values = self.model.predict(state) 	
+        act_values = self.model.predict(state)
+        # print act_values
 	#return np.amax(act_values)
-        #return np.argmax(act_values[0]) 
+        #return np.argmax(act_values[0])
   
     def q_values(self, state): 
         if np.random.rand() <= self.epsilon:
             return np.random.randint(1, self.action_size) 	     	    
         act_values = self.model.predict(state) 
-	return np.mean(act_values[0])
-	#return np.amax(act_values[1])
+	# return np.mean(act_values[0])
+    #     print act_values
+	return np.amax(act_values[1])
        		
     def replay(self, batch_size): 
         minibatch = random.sample(self.memory, batch_size)
@@ -58,10 +60,11 @@ class DQNAgent:
             if not done:
                 target = reward + self.gamma * \
                                   np.amax(self.model.predict(next_state)[0])
+                # print target
                 target_f = self.model.predict(state) 
                 target_f[0][action] = target	
 		tensorboard = TensorBoard(log_dir='logs/{}'.format(time()),batch_size=batch_size,write_images=True,embeddings_freq=10)
-                history = self.model.fit(state, target_f, epochs=500, verbose=0,callbacks=[tensorboard])		
+                history = self.model.fit(state, target_f, epochs=500, verbose=0,callbacks=[tensorboard])
                 #history = self.model.fit(state, target_f, validation_split=0.33, epochs=50, verbose=0)
 				
         if self.epsilon > self.epsilon_min:
