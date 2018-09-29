@@ -63,7 +63,7 @@ int main (int argc, char *argv[])
   not_malicious.Add(c.Get(1));
   not_malicious.Add(c.Get(0));
   not_malicious.Add(c.Get(3));
-  not_malicious.Add(c.Get(4));
+  malicious.Add(c.Get(4));
   malicious.Add(c.Get(2));
   // Set up WiFi
   WifiHelper wifi;
