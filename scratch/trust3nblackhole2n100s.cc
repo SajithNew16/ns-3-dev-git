@@ -201,7 +201,7 @@ int main (int argc, char *argv[])
   for (std::map<FlowId, FlowMonitor::FlowStats>::const_iterator i = stats.begin (); i != stats.end (); ++i)
     {
     Ipv4FlowClassifier::FiveTuple t = classifier->FindFlow (i->first);
-      if ((t.sourceAddress=="10.0.0.5" && t.destinationAddress == "10.0.0.4"))
+      if ((t.sourceAddress=="10.0.0.1" && t.destinationAddress == "10.0.0.2"))
       {
           std::cout << "Flow " << i->first  << " (" << t.sourceAddress << " -> " << t.destinationAddress << ")\n";
           std::cout << "  Tx Bytes:   " << i->second.txBytes << "\n";
