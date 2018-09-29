@@ -171,6 +171,7 @@ int main (int argc, char *argv[])
   anim.UpdateNodeSize (3, 10, 10);
   anim.UpdateNodeSize (4, 10, 10);
   anim.UpdateNodeColor (2,0,0,0);
+  anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("trust3nblackhole2n100s.routes", std::ios::out);
