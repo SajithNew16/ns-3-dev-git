@@ -28,7 +28,7 @@
 #include "ns3/mobility-module.h"
 #include "myapp.h"
 
-NS_LOG_COMPONENT_DEFINE ("Trust9nblackhole1n");
+NS_LOG_COMPONENT_DEFINE ("Trust9nblackhole1n100s");
 
 using namespace ns3;
 
@@ -169,7 +169,7 @@ int main (int argc, char *argv[])
   mobility.Install(c);
 
 
-  AnimationInterface anim ("trust9nblackhole1n.xml"); // Mandatory
+  AnimationInterface anim ("trust9nblackhole1n100s.xml"); // Mandatory
   AnimationInterface::SetConstantPosition (c.Get (0), 0, 400);
   AnimationInterface::SetConstantPosition (c.Get (1), 200, 300);
   AnimationInterface::SetConstantPosition (c.Get (2), 200, 500);
@@ -194,7 +194,7 @@ int main (int argc, char *argv[])
 //  anim.UpdateNodeColor (4,0,0,0);
   anim.EnablePacketMetadata(true);
 
-  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("trust9nblackhole1n.routes", std::ios::out);
+  Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("trust9nblackhole1n100s.routes", std::ios::out);
   trust.PrintRoutingTableAllAt (Seconds (5.5), routingStream);
 
   // Trace Received Packets
@@ -233,7 +233,7 @@ int main (int argc, char *argv[])
       }
      }
 
-  monitor->SerializeToXmlFile("trust9nblackhole1nflow.flowmon", true, true);
+  monitor->SerializeToXmlFile("trust9nblackhole1n100sflow.flowmon", true, true);
 //Flow 1 (10.1.2.2 -> 10.1.2.4)
 
 }
