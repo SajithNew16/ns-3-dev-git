@@ -206,7 +206,6 @@ def main(argv, action=None):
         for reason, drops in enumerate(st.bytesDropped):
             print "Bytes dropped by reason %i: %i" % (reason, drops)
 
-    # Edited Node_details by Wayomi Jayantha #
     def Node_details():
 	    data = np.genfromtxt('trust_routes.txt',delimiter='	')
 	    Expire = data[:,][:,4]
